@@ -495,6 +495,31 @@ function translateThaiMenuWithGlossary(text, targetLang) {
 }
 
 const MENU_TRANSLATION_GLOSSARY = {
+  'ข้าวผัดกะเพราหมู': {
+    en: 'Pork Fried Rice with Holy Basil',
+    'zh-CN': '泰式罗勒猪肉炒饭',
+    ru: 'Жареный рис со свининой и тайским базиликом'
+  },
+  'ข้าวผัดกะเพราไก่': {
+    en: 'Chicken Fried Rice with Holy Basil',
+    'zh-CN': '泰式罗勒鸡肉炒饭',
+    ru: 'Жареный рис с курицей и тайским базиликом'
+  },
+  'ข้าวผัดกะเพราเนื้อ': {
+    en: 'Beef Fried Rice with Holy Basil',
+    'zh-CN': '泰式罗勒牛肉炒饭',
+    ru: 'Жареный рис с говядиной и тайским базиликом'
+  },
+  'ข้าวผัดกะเพรากุ้ง': {
+    en: 'Prawn Fried Rice with Holy Basil',
+    'zh-CN': '泰式罗勒虾仁炒饭',
+    ru: 'Жареный рис с креветками и тайским базиликом'
+  },
+  'ข้าวผัดกะเพราทะเล': {
+    en: 'Seafood Fried Rice with Holy Basil',
+    'zh-CN': '泰式罗勒海鲜炒饭',
+    ru: 'Жареный рис с морепродуктами и тайским базиликом'
+  },
   'ข้าวกะเพราเนื้อ': {
     en: 'Stir-fried Beef with Holy Basil on Rice',
     'zh-CN': '泰式罗勒炒牛肉盖饭',
@@ -663,26 +688,39 @@ const MENU_TRANSLATION_GLOSSARY = {
 };
 
 const PROTEIN_MAP = {
-  'ไก่': { en:'Chicken', zh:'鸡肉', ru:'курицей' },
-  'หมู': { en:'Pork', zh:'猪肉', ru:'свининой' },
-  'เนื้อ': { en:'Beef', zh:'牛肉', ru:'говядиной' },
-  'กุ้ง': { en:'Prawns', zh:'虾', ru:'креветками' },
-  'ทะเล': { en:'Seafood', zh:'海鲜', ru:'морепродуктами' },
-  'ปลาหมึก': { en:'Squid', zh:'鱿鱼', ru:'кальмарами' },
-  'ปลา': { en:'Fish', zh:'鱼', ru:'рыбой' },
-  'ผัก': { en:'Vegetables', zh:'蔬菜', ru:'овощами' }
+  'ไก่': { en:'Chicken', zh:'鸡肉', ruWith:'с курицей', ruPlain:'курицей' },
+  'หมู': { en:'Pork', zh:'猪肉', ruWith:'со свининой', ruPlain:'свининой' },
+  'เนื้อ': { en:'Beef', zh:'牛肉', ruWith:'с говядиной', ruPlain:'говядиной' },
+  'กุ้ง': { en:'Prawns', zh:'虾', ruWith:'с креветками', ruPlain:'креветками' },
+  'ทะเล': { en:'Seafood', zh:'海鲜', ruWith:'с морепродуктами', ruPlain:'морепродуктами' },
+  'ปลาหมึก': { en:'Squid', zh:'鱿鱼', ruWith:'с кальмарами', ruPlain:'кальмарами' },
+  'ปลา': { en:'Fish', zh:'鱼', ruWith:'с рыбой', ruPlain:'рыбой' },
+  'ผัก': { en:'Vegetables', zh:'蔬菜', ruWith:'с овощами', ruPlain:'овощами' }
 };
 
 function translateThaiMenuByRules(key, targetLang) {
   let match;
 
+  // ข้าวผัดกะเพรา/กระเพรา + protein = basil fried rice, not normal fried rice.
+  // Example: ข้าวผัดกะเพราหมู -> Pork Fried Rice with Holy Basil
+  match = key.match(/^ข้าวผัดกะเพรา(.+)$/);
+  if (match) {
+    const protein = PROTEIN_MAP[match[1]];
+    if (protein) {
+      if (targetLang === 'en') return `${protein.en} Fried Rice with Holy Basil`;
+      if (targetLang === 'zh-CN') return `泰式罗勒${protein.zh}炒饭`;
+      if (targetLang === 'ru') return `Жареный рис ${protein.ruWith} и тайским базиликом`;
+    }
+  }
+
+  // ข้าวกะเพรา/ข้าวกระเพรา + protein = stir-fried basil topping on rice.
   match = key.match(/^ข้าวกะเพรา(.+)$/);
   if (match) {
     const protein = PROTEIN_MAP[match[1]];
     if (protein) {
       if (targetLang === 'en') return `Stir-fried ${protein.en} with Holy Basil on Rice`;
       if (targetLang === 'zh-CN') return `泰式罗勒炒${protein.zh}盖饭`;
-      if (targetLang === 'ru') return `Рис с ${protein.ru} и тайским базиликом`;
+      if (targetLang === 'ru') return `Рис ${protein.ruWith} и тайским базиликом`;
     }
   }
 
@@ -692,7 +730,7 @@ function translateThaiMenuByRules(key, targetLang) {
     if (protein) {
       if (targetLang === 'en') return `${protein.en} Fried Rice`;
       if (targetLang === 'zh-CN') return `${protein.zh}炒饭`;
-      if (targetLang === 'ru') return `Жареный рис с ${protein.ru}`;
+      if (targetLang === 'ru') return `Жареный рис ${protein.ruWith}`;
     }
   }
 
@@ -702,7 +740,7 @@ function translateThaiMenuByRules(key, targetLang) {
     if (protein) {
       if (targetLang === 'en') return `Pad Thai with ${protein.en}`;
       if (targetLang === 'zh-CN') return `泰式炒河粉配${protein.zh}`;
-      if (targetLang === 'ru') return `Пад тай с ${protein.ru}`;
+      if (targetLang === 'ru') return `Пад тай ${protein.ruWith}`;
     }
   }
 
@@ -712,13 +750,12 @@ function translateThaiMenuByRules(key, targetLang) {
     if (protein) {
       if (targetLang === 'en') return `Tom Yum with ${protein.en}`;
       if (targetLang === 'zh-CN') return `冬阴功${protein.zh}汤`;
-      if (targetLang === 'ru') return `Том ям с ${protein.ru}`;
+      if (targetLang === 'ru') return `Том ям ${protein.ruWith}`;
     }
   }
 
   return '';
 }
-
 
 function decodeHtml(value) {
   const textarea = document.createElement('textarea');
