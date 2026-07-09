@@ -14,5 +14,9 @@ service cloud.firestore {
     match /chats/{roomId}/messages/{messageId} {
       allow read, write: if true;
     }
+    // v3.1: กล่องข้อความเข้าของพนักงาน ใช้เก็บ summary ว่าห้องไหนทักมาล่าสุด
+    match /chatRooms/{roomId} {
+      allow read, write: if true;
+    }
   }
 }

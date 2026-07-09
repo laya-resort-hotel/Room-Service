@@ -2,7 +2,7 @@ import { firebaseConfig, DEMO_MODE } from './firebase-config.js';
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import {
   getFirestore, collection, collectionGroup, doc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot,
-  serverTimestamp, getDocs
+  serverTimestamp, getDocs, increment
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import {
   getStorage, ref as storageRef, uploadBytes, getDownloadURL
@@ -275,29 +275,28 @@ export function listenRecentChats(callback) {
     window.addEventListener('laya-local-change', emit);
     return () => { clearInterval(timer); window.removeEventListener('storage', emit); window.removeEventListener('laya-local-change', emit); };
   }
-  return onSnapshot(collectionGroup(db, 'messages'), snap => {
-    const grouped = new Map();
-    snap.docs.forEach(d => {
-      const data = { id:d.id, ...d.data() };
-      const room = safeRoom(data.room || d.ref.parent.parent?.id || '');
-      if (!room) return;
-      if (!grouped.has(room)) grouped.set(room, []);
-      grouped.get(room).push(data);
-    });
-    const rooms = Array.from(grouped.entries()).map(([room, msgs]) => {
-      msgs.sort((a,b) => new Date(a.createdAtText || 0) - new Date(b.createdAtText || 0));
-      const lastMsg = msgs[msgs.length - 1] || {};
+
+  // v3.1: use a lightweight chatRooms inbox collection instead of collectionGroup.
+  // This is faster, easier for Firestore Rules, and avoids the staff page staying at "loading".
+  return onSnapshot(collection(db, 'chatRooms'), snap => {
+    const rooms = snap.docs.map(d => {
+      const data = d.data() || {};
       return {
-        room,
-        lastMessage:lastMsg.text || '',
-        lastSender:lastMsg.sender || '',
-        lastAtText:lastMsg.createdAtText || '',
-        unread: msgs.filter(m => m.sender !== 'staff' && !m.staffSeenAtText).length,
-        count: msgs.length
+        id: d.id,
+        room: safeRoom(data.room || d.id),
+        lastMessage: data.lastMessage || '',
+        lastSender: data.lastSender || '',
+        lastAtText: data.lastAtText || '',
+        unread: Number(data.unreadForStaff || 0),
+        count: Number(data.count || 0)
       };
-    }).sort((a,b) => new Date(b.lastAtText || 0) - new Date(a.lastAtText || 0));
+    }).filter(x => x.room)
+      .sort((a,b) => new Date(b.lastAtText || 0) - new Date(a.lastAtText || 0));
     callback(rooms);
-  }, err => console.error('listenRecentChats error', err));
+  }, err => {
+    console.error('listenRecentChats error', err);
+    callback([]);
+  });
 }
 
 export async function markChatSeen(room) {
@@ -313,6 +312,7 @@ export async function markChatSeen(room) {
   const updates = snap.docs
     .filter(d => d.data().sender !== 'staff' && !d.data().staffSeenAtText)
     .map(d => updateDoc(d.ref, { staffSeenAtText:new Date().toISOString() }));
+  updates.push(setDoc(doc(db, 'chatRooms', r), { room:r, unreadForStaff:0, staffSeenAtText:new Date().toISOString(), updatedAt:serverTimestamp() }, { merge:true }));
   await Promise.all(updates);
 }
 
@@ -328,6 +328,17 @@ export async function sendChat(room, sender, text) {
     return;
   }
   await addDoc(collection(db, 'chats', r, 'messages'), { ...payload, createdAt:serverTimestamp() });
+  const roomSummary = {
+    room:r,
+    lastMessage:payload.text,
+    lastSender:sender,
+    lastAt:serverTimestamp(),
+    lastAtText:payload.createdAtText,
+    updatedAt:serverTimestamp(),
+    count:increment(1)
+  };
+  if (sender !== 'staff') roomSummary.unreadForStaff = increment(1);
+  await setDoc(doc(db, 'chatRooms', r), roomSummary, { merge:true });
 }
 
 export function csvEscape(v) { return `"${String(v ?? '').replaceAll('"','""')}"`; }
