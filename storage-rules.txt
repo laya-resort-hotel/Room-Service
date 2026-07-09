@@ -1,0 +1,12 @@
+// Firebase Storage Rules สำหรับทดสอบเท่านั้น — ไม่ควรใช้ Production แบบเปิด public
+// เวอร์ชันจริงควรใช้ Firebase Authentication + role admin/staff
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /menu-images/{allPaths=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+  }
+}

@@ -4,15 +4,20 @@ import {
   getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot,
   serverTimestamp, getDocs
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import {
+  getStorage, ref as storageRef, uploadBytes, getDownloadURL
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
 
 const hasConfig = firebaseConfig && firebaseConfig.projectId && firebaseConfig.apiKey;
 export const isDemo = DEMO_MODE || !hasConfig;
 let app = null;
 let db = null;
+let storage = null;
 
 if (!isDemo) {
   app = initializeApp(firebaseConfig);
   db = getFirestore(app);
+  storage = getStorage(app);
 }
 
 const LS_MENU = 'laya.rs.menu.v2';
@@ -81,6 +86,38 @@ export function listenMenu(callback, includeInactive=false, onError=null) {
   }, err => { if (onError) onError(err); else console.error(err); });
 }
 
+
+export async function uploadMenuImage(fileOrBlob, filename='menu-image.jpg') {
+  if (!fileOrBlob) throw new Error('no-image-file');
+  const safeName = String(filename || 'menu-image.jpg')
+    .replace(/[^a-zA-Z0-9._-]/g, '-')
+    .replace(/-+/g, '-')
+    .slice(0, 80) || 'menu-image.jpg';
+  const ext = (safeName.split('.').pop() || 'jpg').toLowerCase();
+  const path = `menu-images/${new Date().toISOString().slice(0,10)}/${Date.now()}_${Math.random().toString(16).slice(2,8)}.${ext === 'png' ? 'png' : 'jpg'}`;
+
+  if (isDemo) {
+    return { url: await blobToDataUrl(fileOrBlob), path: '' };
+  }
+  const metadata = {
+    contentType: fileOrBlob.type || (ext === 'png' ? 'image/png' : 'image/jpeg'),
+    cacheControl: 'public,max-age=31536000'
+  };
+  const ref = storageRef(storage, path);
+  await uploadBytes(ref, fileOrBlob, metadata);
+  const url = await getDownloadURL(ref);
+  return { url, path };
+}
+
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
 export async function saveMenuItem(item) {
   const payload = {
     active: item.active !== false,
@@ -96,6 +133,7 @@ export async function saveMenuItem(item) {
     descriptionRu: item.descriptionRu || '',
     price: Number(item.price || 0),
     image: item.image || '',
+    imageStoragePath: item.imageStoragePath || '',
     sort: Number(item.sort || 999),
     updatedAtText: new Date().toISOString()
   };

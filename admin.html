@@ -55,21 +55,22 @@
         <div class="field"><label>ราคา</label><input id="price" type="number" min="0" step="1" placeholder="240" required /></div>
         <div class="field"><label>ลำดับแสดงผล</label><input id="sort" type="number" min="0" step="1" value="999" /></div>
         <div class="field"><label>สถานะเมนู</label><label class="switch-row"><input id="active" type="checkbox" checked /> เปิดขาย/แสดงในหน้าลูกค้า</label></div>
-        <div class="field"><label>รูปภาพ URL</label><input id="image" placeholder="https://..." /></div>
+        <div class="field"><label>รูปภาพ URL</label><input id="image" placeholder="https://... หรือปล่อยว่างแล้วอัปโหลดรูปจากเครื่อง" /></div>
         <div id="imagePreviewWrap" class="image-preview-wrap hidden"><img id="imagePreview" alt="preview" /></div>
-        <div class="field"><label>หรืออัปโหลดรูปภาพจากเครื่อง</label><input id="imageUpload" type="file" accept="image/*" /></div>
-        <div class="notice warn">เวอร์ชันนี้รองรับรูปแบบ URL หรือรูปขนาดเล็กแบบ Base64 สำหรับต้นแบบ งานจริงแนะนำใช้ Firebase Storage เพื่อไม่ให้ฐานข้อมูลหนักเกินไป</div>
+        <div class="field"><label>อัปโหลดรูปภาพไป Firebase Storage</label><input id="imageUpload" type="file" accept="image/*" /></div>
+        <div class="notice good">เวอร์ชันนี้อัปโหลดรูปเข้า <b>Firebase Storage</b> อัตโนมัติ แล้วเก็บเฉพาะ URL ไว้ใน Firestore ทำให้ฐานข้อมูลเบากว่า Base64</div>
         <div style="height:12px"></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button id="saveBtn" class="primary" type="submit">บันทึกเมนูใหม่</button>
           <button class="secondary" type="button" id="resetForm">ล้างฟอร์ม / ยกเลิกแก้ไข</button>
           <button class="secondary" type="button" id="seedMenu">ใส่เมนูตัวอย่าง 4 ภาษา</button>
+          <button class="secondary" type="button" id="migrateImages">ย้ายรูป Base64 ไป Storage</button>
         </div>
       </form>
 
       <section class="card card-pad">
         <h2>รายการเมนูทั้งหมด</h2>
-        <div class="notice good" style="margin-bottom:12px">หลังบันทึกแล้ว ถ้าต้องการแก้ข้อมูลหรือเปลี่ยนรูป ให้กดปุ่ม <b>แก้ไขข้อมูล/รูป</b> ในรายการนี้</div>
+        <div class="notice good" style="margin-bottom:12px">หลังบันทึกแล้ว ถ้าต้องการแก้ข้อมูลหรือเปลี่ยนรูป ให้กดปุ่ม <b>แก้ไขข้อมูล/รูป</b> ในรายการนี้ ระบบจะแสดงป้ายว่าแต่ละรูปมาจาก Firebase Storage, URL ภายนอก หรือ Base64</div>
         <div id="menuCount" class="notice" style="margin-bottom:12px">กำลังโหลด...</div>
         <div style="overflow:auto">
           <table class="table">

@@ -79,3 +79,8 @@ img{max-width:100%}
 /* v2.3 multilingual admin fields */
 .lang-field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px}
 @media(max-width:720px){.lang-field-grid{grid-template-columns:1fr}}
+
+.img-badge{display:inline-flex;align-items:center;margin-top:6px;padding:4px 8px;border-radius:999px;background:#eef7f5;color:#2f837a;font-size:11px;font-weight:800}
+.img-badge.good{background:#e7f8ed;color:#1b7f3e}
+.img-badge.warn{background:#fff6df;color:#a66300}
+.img-badge.bad{background:#ffeceb;color:#b42318}
