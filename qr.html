@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>QR Generator | LAYA Room Service</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="header no-print">
+    <div class="brand"><div class="logo">L</div><div><div id="hotelName">LAYA Resort</div><small style="color:var(--muted)">Room QR Generator</small></div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+      <a class="secondary" href="./staff.html">Staff Board</a>
+      <a class="secondary" href="./admin.html">Admin Menu</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero no-print">
+      <h1>สร้าง QR Code ตามเลขห้อง</h1>
+      <p>ใส่ URL หน้าเว็บ และรายการเลขห้อง ระบบจะสร้าง QR สำหรับพิมพ์ติดในห้องพัก</p>
+    </section>
+
+    <section class="card card-pad no-print">
+      <div class="field"><label>Base URL ของหน้า Room Service</label><input id="baseUrl" /></div>
+      <div class="field"><label>รายการห้อง คั่นด้วยบรรทัดหรือ comma</label><textarea id="rooms" style="min-height:130px">A101, A102, A103, A104, A105
+B101, B102, B103, B104, B105
+C101, C102, C103, C104, C105
+D101, D102, D103, D104, D105</textarea></div>
+      <div class="toolbar">
+        <button id="generate" class="primary">Generate QR</button>
+        <button id="print" class="secondary">Print</button>
+        <button id="downloadLinks" class="secondary">Download Links CSV</button>
+      </div>
+      <div class="notice warn">สำหรับใช้งานจริงควรใช้ลิงก์ที่ deploy แล้ว เช่น GitHub Pages URL ไม่ใช่ไฟล์ในเครื่อง</div>
+    </section>
+
+    <section class="card card-pad">
+      <div id="qrGrid" class="qr-grid"></div>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script type="module" src="./qr.js"></script>
+</body>
+</html>

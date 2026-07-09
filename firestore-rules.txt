@@ -1,0 +1,18 @@
+// Firestore Rules สำหรับทดสอบเท่านั้น — ไม่ควรใช้ Production แบบเปิด public
+// เวอร์ชันจริงควรใช้ Firebase Authentication + role staff/admin + token ต่อห้อง
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /menu/{itemId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    match /orders/{orderId} {
+      allow read, write: if true;
+    }
+    match /chats/{roomId}/messages/{messageId} {
+      allow read, write: if true;
+    }
+  }
+}

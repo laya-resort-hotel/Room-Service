@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Admin Menu | LAYA Room Service</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="pinGate" class="pin-gate">
+    <div class="pin-card">
+      <h2>Admin Login</h2>
+      <p style="color:var(--muted)">ใส่ PIN เพื่อแก้ไขเมนูอาหาร</p>
+      <div class="field"><label>PIN</label><input id="pinInput" type="password" inputmode="numeric" placeholder="1234" /></div>
+      <button id="pinBtn" class="primary" style="width:100%">เข้าใช้งาน</button>
+      <div id="pinErr" class="notice bad hidden" style="margin-top:10px">PIN ไม่ถูกต้อง</div>
+    </div>
+  </div>
+
+  <header class="header">
+    <div class="brand"><div class="logo">L</div><div><div id="hotelName">LAYA Resort</div><small style="color:var(--muted)">Menu Admin</small></div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+      <a class="secondary" href="./staff.html">Staff Board</a>
+      <a class="secondary" href="./qr.html">QR</a>
+      <span id="modePill" class="mode-pill hidden">Demo</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>แก้ไขเมนูอาหารและราคา</h1>
+      <p>เพิ่ม/แก้ไข/ลบเมนูได้จากหน้านี้ ข้อมูลจะอัปเดตไปหน้าลูกค้าแบบ Realtime เมื่อเชื่อม Firebase แล้ว</p>
+    </section>
+
+    <section class="grid">
+      <form id="menuForm" class="card card-pad">
+        <h2 id="formTitle">เพิ่มเมนูใหม่</h2>
+        <input type="hidden" id="itemId" />
+        <div class="field"><label>หมวดหมู่</label><input id="category" placeholder="เช่น Thai Food / Western / Beverage" required /></div>
+        <div class="field"><label>ชื่อเมนูภาษาไทย</label><input id="nameTh" placeholder="ผัดไทยกุ้ง" required /></div>
+        <div class="field"><label>ชื่อเมนูภาษาอังกฤษ</label><input id="nameEn" placeholder="Pad Thai Goong" /></div>
+        <div class="field"><label>รายละเอียด</label><textarea id="description" placeholder="รายละเอียดเมนู / วัตถุดิบ / หมายเหตุแพ้อาหาร"></textarea></div>
+        <div class="field"><label>ราคา</label><input id="price" type="number" min="0" step="1" placeholder="240" required /></div>
+        <div class="field"><label>ลำดับแสดงผล</label><input id="sort" type="number" min="0" step="1" value="999" /></div>
+        <div class="field"><label>รูปภาพ URL</label><input id="image" placeholder="https://..." /></div>
+        <div class="field"><label>หรืออัปโหลดรูปภาพจากเครื่อง</label><input id="imageUpload" type="file" accept="image/*" /></div>
+        <div class="notice warn">เวอร์ชันนี้รองรับรูปแบบ URL หรือรูปขนาดเล็กแบบ Base64 สำหรับต้นแบบ งานจริงแนะนำใช้ Firebase Storage เพื่อไม่ให้ฐานข้อมูลหนักเกินไป</div>
+        <div style="height:12px"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="primary" type="submit">บันทึกเมนู</button>
+          <button class="secondary" type="button" id="resetForm">ล้างฟอร์ม</button>
+          <button class="secondary" type="button" id="seedMenu">ใส่เมนูตัวอย่าง</button>
+        </div>
+      </form>
+
+      <section class="card card-pad">
+        <h2>รายการเมนูทั้งหมด</h2>
+        <div id="menuCount" class="notice" style="margin-bottom:12px">กำลังโหลด...</div>
+        <div style="overflow:auto">
+          <table class="table">
+            <thead><tr><th>รูป</th><th>เมนู</th><th>หมวด</th><th>ราคา</th><th>จัดการ</th></tr></thead>
+            <tbody id="menuTable"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script type="module" src="./admin.js"></script>
+</body>
+</html>

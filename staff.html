@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Staff Board | LAYA Room Service</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="pinGate" class="pin-gate">
+    <div class="pin-card">
+      <h2>Staff Login</h2>
+      <p style="color:var(--muted)">ใส่ PIN พนักงานเพื่อเข้า Order Board</p>
+      <div class="field"><label>PIN</label><input id="pinInput" type="password" inputmode="numeric" placeholder="1234" /></div>
+      <button id="pinBtn" class="primary" style="width:100%">เข้าใช้งาน</button>
+      <div id="pinErr" class="notice bad hidden" style="margin-top:10px">PIN ไม่ถูกต้อง</div>
+    </div>
+  </div>
+
+  <header class="header">
+    <div class="brand"><div class="logo">L</div><div><div id="hotelName">LAYA Resort</div><small style="color:var(--muted)">Room Service Staff Board</small></div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+      <a class="secondary" href="./admin.html">Admin Menu</a>
+      <a class="secondary" href="./qr.html">QR</a>
+      <span id="modePill" class="mode-pill hidden">Demo</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Realtime Order Board</h1>
+      <p>ออเดอร์จากห้องพักจะแสดงที่นี่แบบ Realtime พร้อมเปลี่ยนสถานะและแชทกับลูกค้า</p>
+    </section>
+
+    <div class="staff-layout">
+      <section class="card card-pad">
+        <div class="toolbar">
+          <select id="statusFilter">
+            <option value="active">แสดงงานที่ยังไม่จบ</option>
+            <option value="all">ทั้งหมด</option>
+            <option value="new">ออเดอร์ใหม่</option>
+            <option value="preparing">กำลังเตรียม</option>
+            <option value="delivering">กำลังนำส่ง</option>
+            <option value="done">สำเร็จ</option>
+            <option value="cancelled">ยกเลิก</option>
+          </select>
+          <input id="roomSearch" placeholder="ค้นหาเลขห้อง เช่น A101" />
+          <button id="exportCsv" class="secondary">Export CSV</button>
+        </div>
+        <div id="orderSummary" class="notice" style="margin-bottom:12px">กำลังโหลดออเดอร์...</div>
+        <div id="orders" class="orders"></div>
+      </section>
+
+      <aside class="card card-pad panel">
+        <h2>แชทกับลูกค้า</h2>
+        <div class="field"><label>เลือก/ใส่เลขห้อง</label><input id="chatRoom" placeholder="เช่น A101" /></div>
+        <button id="openChat" class="secondary" style="width:100%;margin-bottom:10px">เปิดแชทห้องนี้</button>
+        <div id="chatTitle" class="notice">ยังไม่ได้เลือกห้อง</div>
+        <div style="height:10px"></div>
+        <div class="chat-box">
+          <div id="chatMessages" class="chat-messages"><div class="empty">เลือกห้องเพื่อดูแชท</div></div>
+          <div class="chat-send">
+            <input id="chatInput" placeholder="ตอบลูกค้า..." />
+            <button class="primary" id="sendChat">ส่ง</button>
+          </div>
+        </div>
+        <p class="footer-note">หมายเหตุ: PIN แบบนี้เหมาะสำหรับต้นแบบเท่านั้น งานจริงควรใช้ Firebase Authentication หรือระบบ Login พนักงาน</p>
+      </aside>
+    </div>
+  </main>
+
+  <script type="module" src="./staff.js"></script>
+</body>
+</html>
