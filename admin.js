@@ -430,6 +430,14 @@ async function translateText(text, targetLang) {
   const cacheKey = `th|${targetLang}|${sourceText}`;
   if (translateCache.has(cacheKey)) return translateCache.get(cacheKey);
 
+  // First use a hotel/Thai-food glossary. Public translation APIs often mistranslate menu names
+  // such as "ข้าวกระเพราเนื้อ" as literal/awkward words. The glossary keeps food names consistent.
+  const glossaryTranslation = translateThaiMenuWithGlossary(sourceText, targetLang);
+  if (glossaryTranslation) {
+    translateCache.set(cacheKey, glossaryTranslation);
+    return glossaryTranslation;
+  }
+
   let translated = '';
   try {
     const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(sourceText)}&langpair=th|${encodeURIComponent(targetLang)}`;
@@ -459,6 +467,258 @@ async function translateText(text, targetLang) {
   translateCache.set(cacheKey, translated);
   return translated;
 }
+
+function normalizeThaiText(value) {
+  return String(value || '')
+    .trim()
+    .replace(/\s+/g, '')
+    .replace(/[ๆฯ,.()\[\]{}:;!?'"“”‘’\-_/\\]/g, '')
+    .replace(/กระเพรา/g, 'กะเพรา')
+    .replace(/กระเพา/g, 'กะเพรา')
+    .replace(/กระเพา/g, 'กะเพรา')
+    .replace(/กระเพาะ/g, 'กะเพรา')
+    .replace(/กระเพร่า/g, 'กะเพรา');
+}
+
+function translateThaiMenuWithGlossary(text, targetLang) {
+  const source = String(text || '').trim();
+  const key = normalizeThaiText(source);
+  if (!key) return '';
+
+  const exact = MENU_TRANSLATION_GLOSSARY[key];
+  if (exact) return exact[targetLang] || exact.en || '';
+
+  const ruleBased = translateThaiMenuByRules(key, targetLang);
+  if (ruleBased) return ruleBased;
+
+  return '';
+}
+
+const MENU_TRANSLATION_GLOSSARY = {
+  'ข้าวกะเพราเนื้อ': {
+    en: 'Stir-fried Beef with Holy Basil on Rice',
+    'zh-CN': '泰式罗勒炒牛肉盖饭',
+    ru: 'Рис с говядиной и тайским базиликом'
+  },
+  'ข้าวกะเพราหมู': {
+    en: 'Stir-fried Pork with Holy Basil on Rice',
+    'zh-CN': '泰式罗勒炒猪肉盖饭',
+    ru: 'Рис со свининой и тайским базиликом'
+  },
+  'ข้าวกะเพราไก่': {
+    en: 'Stir-fried Chicken with Holy Basil on Rice',
+    'zh-CN': '泰式罗勒炒鸡肉盖饭',
+    ru: 'Рис с курицей и тайским базиликом'
+  },
+  'ข้าวกะเพรากุ้ง': {
+    en: 'Stir-fried Prawns with Holy Basil on Rice',
+    'zh-CN': '泰式罗勒炒虾盖饭',
+    ru: 'Рис с креветками и тайским базиликом'
+  },
+  'ข้าวกะเพราทะเล': {
+    en: 'Stir-fried Seafood with Holy Basil on Rice',
+    'zh-CN': '泰式罗勒炒海鲜盖饭',
+    ru: 'Рис с морепродуктами и тайским базиликом'
+  },
+  'ผัดไทยกุ้ง': {
+    en: 'Pad Thai with Prawns',
+    'zh-CN': '泰式炒河粉配虾',
+    ru: 'Пад тай с креветками'
+  },
+  'ผัดไทยไก่': {
+    en: 'Pad Thai with Chicken',
+    'zh-CN': '泰式炒河粉配鸡肉',
+    ru: 'Пад тай с курицей'
+  },
+  'กุ้งสะโหร่ง': {
+    en: 'Goong Sa-Rong (Crispy Prawns Wrapped in Vermicelli)',
+    'zh-CN': '酥炸粉丝裹虾',
+    ru: 'Креветки в хрустящей вермишели'
+  },
+  'ต้มยำกุ้ง': {
+    en: 'Tom Yum Goong',
+    'zh-CN': '冬阴功虾汤',
+    ru: 'Том ям с креветками'
+  },
+  'ต้มยำทะเล': {
+    en: 'Tom Yum Seafood',
+    'zh-CN': '冬阴功海鲜汤',
+    ru: 'Том ям с морепродуктами'
+  },
+  'ต้มข่าไก่': {
+    en: 'Chicken Coconut Soup with Galangal',
+    'zh-CN': '南姜椰奶鸡汤',
+    ru: 'Куриный суп с кокосовым молоком и галангалом'
+  },
+  'ข้าวผัดไก่': {
+    en: 'Chicken Fried Rice',
+    'zh-CN': '鸡肉炒饭',
+    ru: 'Жареный рис с курицей'
+  },
+  'ข้าวผัดหมู': {
+    en: 'Pork Fried Rice',
+    'zh-CN': '猪肉炒饭',
+    ru: 'Жареный рис со свининой'
+  },
+  'ข้าวผัดเนื้อ': {
+    en: 'Beef Fried Rice',
+    'zh-CN': '牛肉炒饭',
+    ru: 'Жареный рис с говядиной'
+  },
+  'ข้าวผัดกุ้ง': {
+    en: 'Prawn Fried Rice',
+    'zh-CN': '虾仁炒饭',
+    ru: 'Жареный рис с креветками'
+  },
+  'ข้าวผัดทะเล': {
+    en: 'Seafood Fried Rice',
+    'zh-CN': '海鲜炒饭',
+    ru: 'Жареный рис с морепродуктами'
+  },
+  'ส้มตำไทย': {
+    en: 'Thai Papaya Salad',
+    'zh-CN': '泰式青木瓜沙拉',
+    ru: 'Тайский салат из папайи'
+  },
+  'ส้มตำกุ้งสด': {
+    en: 'Papaya Salad with Fresh Prawns',
+    'zh-CN': '鲜虾青木瓜沙拉',
+    ru: 'Салат из папайи со свежими креветками'
+  },
+  'ลาบหมู': {
+    en: 'Spicy Minced Pork Salad',
+    'zh-CN': '香辣猪肉末沙拉',
+    ru: 'Острый салат из рубленой свинины'
+  },
+  'ลาบไก่': {
+    en: 'Spicy Minced Chicken Salad',
+    'zh-CN': '香辣鸡肉末沙拉',
+    ru: 'Острый салат из рубленой курицы'
+  },
+  'แกงเขียวหวานไก่': {
+    en: 'Green Curry with Chicken',
+    'zh-CN': '鸡肉绿咖喱',
+    ru: 'Зеленое карри с курицей'
+  },
+  'แกงเขียวหวานเนื้อ': {
+    en: 'Green Curry with Beef',
+    'zh-CN': '牛肉绿咖喱',
+    ru: 'Зеленое карри с говядиной'
+  },
+  'มัสมั่นไก่': {
+    en: 'Massaman Curry with Chicken',
+    'zh-CN': '马萨曼鸡肉咖喱',
+    ru: 'Массаман карри с курицей'
+  },
+  'มัสมั่นเนื้อ': {
+    en: 'Massaman Curry with Beef',
+    'zh-CN': '马萨曼牛肉咖喱',
+    ru: 'Массаман карри с говядиной'
+  },
+  'ไก่ผัดเม็ดมะม่วง': {
+    en: 'Stir-fried Chicken with Cashew Nuts',
+    'zh-CN': '腰果炒鸡肉',
+    ru: 'Курица с кешью'
+  },
+  'ปอเปี๊ยะทอด': {
+    en: 'Crispy Spring Rolls',
+    'zh-CN': '炸春卷',
+    ru: 'Жареные спринг-роллы'
+  },
+  'เฟรนช์ฟรายส์': {
+    en: 'French Fries',
+    'zh-CN': '炸薯条',
+    ru: 'Картофель фри'
+  },
+  'สปาเก็ตตี้คาโบนาร่า': {
+    en: 'Spaghetti Carbonara',
+    'zh-CN': '培根蛋黄酱意大利面',
+    ru: 'Спагетти карбонара'
+  },
+  'สปาเก็ตตี้โบโลเนส': {
+    en: 'Spaghetti Bolognese',
+    'zh-CN': '肉酱意大利面',
+    ru: 'Спагетти болоньезе'
+  },
+  'คลับแซนด์วิช': {
+    en: 'Club Sandwich',
+    'zh-CN': '总汇三明治',
+    ru: 'Клаб-сэндвич'
+  },
+  'ซีซาร์สลัด': {
+    en: 'Caesar Salad',
+    'zh-CN': '凯撒沙拉',
+    ru: 'Салат Цезарь'
+  },
+  'เบอร์เกอร์เนื้อ': {
+    en: 'Beef Burger',
+    'zh-CN': '牛肉汉堡',
+    ru: 'Бургер с говядиной'
+  },
+  'เบอร์เกอร์ไก่': {
+    en: 'Chicken Burger',
+    'zh-CN': '鸡肉汉堡',
+    ru: 'Бургер с курицей'
+  }
+};
+
+const PROTEIN_MAP = {
+  'ไก่': { en:'Chicken', zh:'鸡肉', ru:'курицей' },
+  'หมู': { en:'Pork', zh:'猪肉', ru:'свининой' },
+  'เนื้อ': { en:'Beef', zh:'牛肉', ru:'говядиной' },
+  'กุ้ง': { en:'Prawns', zh:'虾', ru:'креветками' },
+  'ทะเล': { en:'Seafood', zh:'海鲜', ru:'морепродуктами' },
+  'ปลาหมึก': { en:'Squid', zh:'鱿鱼', ru:'кальмарами' },
+  'ปลา': { en:'Fish', zh:'鱼', ru:'рыбой' },
+  'ผัก': { en:'Vegetables', zh:'蔬菜', ru:'овощами' }
+};
+
+function translateThaiMenuByRules(key, targetLang) {
+  let match;
+
+  match = key.match(/^ข้าวกะเพรา(.+)$/);
+  if (match) {
+    const protein = PROTEIN_MAP[match[1]];
+    if (protein) {
+      if (targetLang === 'en') return `Stir-fried ${protein.en} with Holy Basil on Rice`;
+      if (targetLang === 'zh-CN') return `泰式罗勒炒${protein.zh}盖饭`;
+      if (targetLang === 'ru') return `Рис с ${protein.ru} и тайским базиликом`;
+    }
+  }
+
+  match = key.match(/^ข้าวผัด(.+)$/);
+  if (match) {
+    const protein = PROTEIN_MAP[match[1]];
+    if (protein) {
+      if (targetLang === 'en') return `${protein.en} Fried Rice`;
+      if (targetLang === 'zh-CN') return `${protein.zh}炒饭`;
+      if (targetLang === 'ru') return `Жареный рис с ${protein.ru}`;
+    }
+  }
+
+  match = key.match(/^ผัดไทย(.+)$/);
+  if (match) {
+    const protein = PROTEIN_MAP[match[1]];
+    if (protein) {
+      if (targetLang === 'en') return `Pad Thai with ${protein.en}`;
+      if (targetLang === 'zh-CN') return `泰式炒河粉配${protein.zh}`;
+      if (targetLang === 'ru') return `Пад тай с ${protein.ru}`;
+    }
+  }
+
+  match = key.match(/^ต้มยำ(.+)$/);
+  if (match) {
+    const protein = PROTEIN_MAP[match[1]];
+    if (protein) {
+      if (targetLang === 'en') return `Tom Yum with ${protein.en}`;
+      if (targetLang === 'zh-CN') return `冬阴功${protein.zh}汤`;
+      if (targetLang === 'ru') return `Том ям с ${protein.ru}`;
+    }
+  }
+
+  return '';
+}
+
 
 function decodeHtml(value) {
   const textarea = document.createElement('textarea');
