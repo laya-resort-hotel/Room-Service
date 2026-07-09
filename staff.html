@@ -20,7 +20,7 @@
   <header class="header">
     <div class="brand"><div class="logo">L</div><div><div id="hotelName">LAYA Resort</div><small style="color:var(--muted)">Room Service Staff Board</small></div></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-      <button id="enableAlerts" class="secondary" type="button">เปิดเสียง/แจ้งเตือน</button>
+      <button id="enableAlerts" class="secondary alert-toggle" type="button">🔊 เปิดเสียงแจ้งเตือน</button>
       <a class="secondary" href="./admin.html">Admin Menu</a>
       <a class="secondary" href="./qr.html">QR</a>
       <span id="modePill" class="mode-pill hidden">Demo</span>
@@ -35,6 +35,7 @@
       <span id="staffAlertText">ลูกค้าส่งข้อความใหม่</span>
     </div>
     <button id="alertOpenChat" class="alert-open" type="button">เปิดแชท</button>
+    <button id="alertSilence" class="alert-silence" type="button">หยุดเสียง</button>
     <button id="alertDismiss" class="alert-close" type="button" aria-label="ปิดแจ้งเตือน">×</button>
   </div>
 
@@ -65,6 +66,11 @@
 
       <aside class="card card-pad panel">
         <h2>แชทกับลูกค้า</h2>
+        <div class="staff-alert-controls">
+          <button id="enableAlertsPanel" class="primary alert-toggle" type="button">🔊 เปิดเสียงแจ้งเตือน</button>
+          <button id="stopAlertSound" class="secondary" type="button">หยุดเสียง</button>
+        </div>
+        <div class="notice warn staff-sound-note">ถ้ามีลูกค้าทักมา เสียงจะดังซ้ำจนกว่าพนักงานจะกดเปิดแชท / หยุดเสียง / ปิดแจ้งเตือน</div>
         <div class="chat-inbox-head">
           <strong>กล่องข้อความเข้า</strong>
           <small id="chatInboxSummary">กำลังโหลด...</small>
@@ -72,7 +78,10 @@
         <div id="chatInbox" class="chat-inbox"><div class="empty">ยังไม่มีแชทจากลูกค้า</div></div>
         <div class="field"><label>เลือก/ใส่เลขห้อง</label><input id="chatRoom" placeholder="เช่น A101" /></div>
         <button id="openChat" class="secondary" style="width:100%;margin-bottom:10px">เปิดแชทห้องนี้</button>
-        <div id="chatTitle" class="notice">ยังไม่ได้เลือกห้อง</div>
+        <div class="chat-title-row">
+          <div id="chatTitle" class="notice">ยังไม่ได้เลือกห้อง</div>
+          <button id="closeChatRoom" class="danger" type="button" disabled>ปิดแชทนี้</button>
+        </div>
         <div style="height:10px"></div>
         <div class="chat-box">
           <div id="chatMessages" class="chat-messages"><div class="empty">เลือกห้องเพื่อดูแชท</div></div>

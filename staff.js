@@ -1,5 +1,5 @@
 import { HOTEL_NAME, STAFF_PIN } from './firebase-config.js';
-import { isDemo, listenOrders, updateOrderStatus, listenChat, sendChat, listenRecentChats, markChatSeen, thb, fmtDate, statusText, downloadCsv } from './firebase-service.js';
+import { isDemo, listenOrders, updateOrderStatus, listenChat, sendChat, listenRecentChats, markChatSeen, closeChatRoom as closeChatRoomData, thb, fmtDate, statusText, downloadCsv } from './firebase-service.js';
 
 const $ = (id) => document.getElementById(id);
 let allOrders = [];
@@ -13,23 +13,29 @@ let chatFirstLoad = true;
 let knownChatRooms = new Map();
 let pendingAlertRoom = '';
 let alertToneTimer = null;
+let alertSoundEnabled = localStorage.getItem('laya.rs.staffAlertSound') !== '0';
 let titleFlashTimer = null;
 const originalTitle = document.title;
 
 $('hotelName').textContent = HOTEL_NAME;
 if (isDemo) { $('modePill').classList.remove('hidden'); $('modePill').classList.add('demo'); $('modePill').textContent = 'Demo Mode'; }
+updateAlertButton();
 
-function unlock() { sessionStorage.setItem('layaStaffOk', '1'); $('pinGate').classList.add('hidden'); start(); }
+function unlock() { sessionStorage.setItem('layaStaffOk', '1'); $('pinGate').classList.add('hidden'); unlockAudioForBrowser(); updateAlertButton(); start(); }
 if (sessionStorage.getItem('layaStaffOk') === '1') unlock();
 $('pinBtn').addEventListener('click', () => { if ($('pinInput').value === STAFF_PIN) unlock(); else $('pinErr').classList.remove('hidden'); });
 $('pinInput').addEventListener('keydown', e => { if (e.key === 'Enter') $('pinBtn').click(); });
 
-if ($('enableAlerts')) $('enableAlerts').addEventListener('click', enableStaffAlerts);
+if ($('enableAlerts')) $('enableAlerts').addEventListener('click', toggleStaffAlerts);
+if ($('enableAlertsPanel')) $('enableAlertsPanel').addEventListener('click', toggleStaffAlerts);
+if ($('stopAlertSound')) $('stopAlertSound').addEventListener('click', stopAlertSoundOnly);
 if ($('alertOpenChat')) $('alertOpenChat').addEventListener('click', () => {
   if (pendingAlertRoom) openChat(pendingAlertRoom);
   hideStaffAlert();
 });
+if ($('alertSilence')) $('alertSilence').addEventListener('click', stopAlertSoundOnly);
 if ($('alertDismiss')) $('alertDismiss').addEventListener('click', hideStaffAlert);
+if ($('closeChatRoom')) $('closeChatRoom').addEventListener('click', closeActiveChatRoom);
 
 function start() {
   listenOrders((orders) => {
@@ -108,19 +114,33 @@ function beep() {
 }
 
 
-function enableStaffAlerts() {
-  unlockAudioForBrowser();
-  if ('Notification' in window && Notification.permission === 'default') {
-    Notification.requestPermission().then(() => updateAlertButton());
-  } else updateAlertButton();
-  showSmallNotice('เปิดระบบแจ้งเตือนแล้ว ถ้าลูกค้าทักมา จะมีเสียงและป๊อปอัปบน Staff Board');
+function toggleStaffAlerts() {
+  alertSoundEnabled = !alertSoundEnabled;
+  localStorage.setItem('laya.rs.staffAlertSound', alertSoundEnabled ? '1' : '0');
+  if (alertSoundEnabled) {
+    unlockAudioForBrowser();
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission().then(() => updateAlertButton());
+    }
+    showSmallNotice('เปิดเสียงแจ้งเตือนแล้ว ถ้าลูกค้าทักมา เสียงจะดังซ้ำจนกว่าพนักงานจะรับทราบ');
+  } else {
+    stopAlertSoundOnly();
+    showSmallNotice('ปิดเสียงแจ้งเตือนแล้ว แต่กล่องแจ้งเตือนบนหน้าจอยังแสดงอยู่');
+  }
+  updateAlertButton();
 }
 
 function updateAlertButton() {
-  const btn = $('enableAlerts');
-  if (!btn) return;
-  if ('Notification' in window && Notification.permission === 'granted') btn.textContent = 'แจ้งเตือนเปิดแล้ว';
-  else btn.textContent = 'เปิดเสียง/แจ้งเตือน';
+  document.querySelectorAll('.alert-toggle').forEach(btn => {
+    btn.textContent = alertSoundEnabled ? '🔊 เสียงแจ้งเตือนเปิดอยู่' : '🔇 เสียงแจ้งเตือนปิดอยู่';
+    btn.classList.toggle('alert-on', alertSoundEnabled);
+    btn.classList.toggle('alert-off', !alertSoundEnabled);
+  });
+}
+
+function stopAlertSoundOnly() {
+  if (alertToneTimer) { clearInterval(alertToneTimer); alertToneTimer = null; }
+  stopTitleFlash();
 }
 
 function unlockAudioForBrowser() {
@@ -172,7 +192,7 @@ function triggerChatAlert(chat, totalUnreadRooms=1, fromExisting=false) {
     : `มีข้อความใหม่จาก Room ${chat.room}`;
   const body = `${fromExisting ? 'มีแชทค้าง: ' : ''}${chat.lastMessage || 'ลูกค้าส่งข้อความใหม่'}`;
   showStaffAlert(title, body, chat.room);
-  playChatAlertTone();
+  if (alertSoundEnabled) playChatAlertTone();
   vibrateStaffDevice();
   flashPageTitle(`🔔 Room ${chat.room}`);
   sendDesktopNotification(title, body, chat.room);
@@ -192,24 +212,41 @@ function showStaffAlert(title, body, room) {
 function hideStaffAlert() {
   const box = $('staffAlert');
   if (box) box.classList.add('hidden');
-  stopTitleFlash();
-  if (alertToneTimer) { clearInterval(alertToneTimer); alertToneTimer = null; }
+  stopAlertSoundOnly();
 }
 
 function playChatAlertTone() {
-  beep();
-  setTimeout(beep, 260);
+  loudAlertBeep();
   if (alertToneTimer) clearInterval(alertToneTimer);
-  // repeat gently while the alert is still visible, so staff notices even when away from the screen
-  let count = 0;
+  // ดังซ้ำไปเรื่อย ๆ จนกว่าพนักงานจะกดเปิดแชท / หยุดเสียง / ปิดแจ้งเตือน
   alertToneTimer = setInterval(() => {
     const box = $('staffAlert');
-    if (!box || box.classList.contains('hidden') || count >= 5) {
+    if (!box || box.classList.contains('hidden') || !alertSoundEnabled) {
       clearInterval(alertToneTimer); alertToneTimer = null; return;
     }
-    beep();
-    count += 1;
-  }, 4500);
+    loudAlertBeep();
+  }, 1300);
+}
+
+function loudAlertBeep() {
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    const ctx = new Ctx();
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.22, ctx.currentTime + 0.03);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.82);
+    gain.connect(ctx.destination);
+    [880, 1175, 880].forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.22);
+      osc.connect(gain);
+      osc.start(ctx.currentTime + idx * 0.22);
+      osc.stop(ctx.currentTime + idx * 0.22 + 0.18);
+    });
+    setTimeout(() => { try { ctx.close(); } catch {} }, 1000);
+  } catch { beep(); setTimeout(beep, 220); }
 }
 
 function vibrateStaffDevice() {
@@ -281,6 +318,7 @@ async function openChat(room) {
   if (!activeRoom) return;
   $('chatRoom').value = activeRoom;
   $('chatTitle').innerHTML = `กำลังคุยกับ <strong>Room ${escapeHtml(activeRoom)}</strong>`;
+  $('closeChatRoom').disabled = false;
   if (unsubChat) unsubChat();
   unsubChat = listenChat(activeRoom, renderChat);
   await markChatSeen(activeRoom).catch(() => {});
@@ -304,6 +342,26 @@ async function sendStaffChat() {
   $('chatInput').value = '';
   await sendChat(activeRoom, 'staff', text);
 }
+
+async function closeActiveChatRoom() {
+  if (!activeRoom) return;
+  const room = activeRoom;
+  const ok = confirm(`ปิดแชท Room ${room} ใช่ไหม?
+
+แชทจะหายจากกล่องข้อความเข้า แต่ถ้าลูกค้าทักมาใหม่ ห้องนี้จะเด้งกลับมาอีกครั้ง`);
+  if (!ok) return;
+  await closeChatRoomData(room);
+  if (unsubChat) { unsubChat(); unsubChat = null; }
+  activeRoom = '';
+  pendingAlertRoom = pendingAlertRoom === room ? '' : pendingAlertRoom;
+  hideStaffAlert();
+  $('chatRoom').value = '';
+  $('chatTitle').innerHTML = `ปิดแชท Room <strong>${escapeHtml(room)}</strong> แล้ว`;
+  $('chatMessages').innerHTML = '<div class="empty">ปิดแชทแล้ว ถ้าลูกค้าทักมาใหม่ ห้องนี้จะกลับมาในกล่องข้อความเข้า</div>';
+  $('closeChatRoom').disabled = true;
+  renderChatInbox();
+}
+
 $('exportCsv').addEventListener('click', () => {
   const rows = [['Created At','Room','Guest','Status','Items','Note','Total','Ref']];
   allOrders.forEach(o => rows.push([o.createdAtText, o.room, o.guestName, statusText(o.status), (o.items||[]).map(i => `${i.name} x ${i.qty}`).join(' | '), o.note, o.total, o.id]));

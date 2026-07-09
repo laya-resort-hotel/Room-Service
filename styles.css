@@ -119,3 +119,15 @@ img{max-width:100%}
 .staff-alert-icon{width:44px;height:44px;border-radius:999px;background:#ffb020;color:#fff;display:grid;place-items:center;font-size:25px;animation:alertPulse 1.2s infinite}
 .staff-alert-body{display:grid;gap:3px;min-width:0}.staff-alert-body strong{font-size:17px;color:#5a3600}.staff-alert-body span{color:#3f3325;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.alert-open{background:var(--brand);color:#fff;border-radius:14px;padding:10px 14px;font-weight:950}.alert-close{width:38px;height:38px;border-radius:999px;background:#fff;border:1px solid #f3c262;color:#8a5400;font-size:24px;line-height:1}.shake-once{animation:staffAlertShake .55s ease-in-out 1}@keyframes alertPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}@keyframes staffAlertShake{0%,100%{transform:translateX(-50%)}20%{transform:translateX(calc(-50% - 8px))}40%{transform:translateX(calc(-50% + 8px))}60%{transform:translateX(calc(-50% - 5px))}80%{transform:translateX(calc(-50% + 5px))}}
 @media(max-width:720px){.staff-alert{top:70px;grid-template-columns:auto 1fr;gap:10px}.staff-alert-body span{white-space:normal}.alert-open{grid-column:1/2}.alert-close{position:absolute;right:8px;top:8px}}
+
+/* v3.3 close chat + loud persistent alert */
+.staff-alert-controls{display:grid;grid-template-columns:1fr auto;gap:8px;margin:0 0 10px;align-items:center}
+.staff-sound-note{font-size:12px;margin-bottom:10px}
+.alert-toggle.alert-on{background:#e9fbf1;border-color:#9fd9b8;color:#177245}
+.alert-toggle.alert-off{background:#fff1f1;border-color:#e8b7b7;color:#b73939}
+.alert-silence{background:#111;color:#fff;border-radius:14px;padding:10px 14px;font-weight:950}
+.chat-title-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:stretch;margin-bottom:10px}
+.chat-title-row .notice{margin:0;display:flex;align-items:center}
+button:disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.2)}
+@media(min-width:721px){.staff-alert{grid-template-columns:auto 1fr auto auto auto}}
+@media(max-width:720px){.staff-alert-controls,.chat-title-row{grid-template-columns:1fr}.alert-silence{grid-column:2/3}.staff-alert .alert-silence{grid-column:2/3}}

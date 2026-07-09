@@ -23,6 +23,7 @@ if (!isDemo) {
 const LS_MENU = 'laya.rs.menu.v2';
 const LS_ORDERS = 'laya.rs.orders.v2';
 const LS_CHAT = 'laya.rs.chat.v2.';
+const LS_CLOSED_CHATS = 'laya.rs.closedChats.v1';
 
 const sampleMenu = [
   { id:'demo-andaman-salad', active:true, category:'Room Service', nameTh:'🌶️🌶️ อันดามันซีฟู้ดสลัด', nameEn:'Andaman Seafood Salad', nameZh:'安达曼海鲜沙拉', nameRu:'Андаманский салат с морепродуктами', tags:'🌶️🌶️ Signature', description:'ซีฟู้ดสด น้ำสลัดรสจัด เสิร์ฟเย็นแบบเบา ๆ', descriptionTh:'ซีฟู้ดสด น้ำสลัดรสจัด เสิร์ฟเย็นแบบเบา ๆ', descriptionEn:'Fresh seafood salad with spicy dressing, served chilled.', descriptionZh:'新鲜海鲜沙拉，搭配香辣酱汁，冷食清爽。', descriptionRu:'Свежий салат с морепродуктами и пикантной заправкой, подается охлажденным.', price:470, image:'https://images.unsplash.com/photo-1553621042-f6e147245754?q=80&w=600&auto=format&fit=crop', sort:10 },
@@ -263,7 +264,9 @@ export function listenRecentChats(callback) {
         if (!msgs.length) continue;
         const lastMsg = msgs[msgs.length - 1];
         const unread = msgs.filter(m => m.sender !== 'staff' && !m.staffSeenAtText).length;
-        rooms.push({ room, lastMessage:lastMsg.text || '', lastSender:lastMsg.sender || '', lastAtText:lastMsg.createdAtText || '', unread, count:msgs.length });
+        const closedRooms = readLS(LS_CLOSED_CHATS, {});
+        if (closedRooms[room] && unread === 0) continue;
+        rooms.push({ room, lastMessage:lastMsg.text || '', lastSender:lastMsg.sender || '', lastAtText:lastMsg.createdAtText || '', unread, count:msgs.length, closed:!!closedRooms[room] });
       }
       rooms.sort((a,b) => new Date(b.lastAtText || 0) - new Date(a.lastAtText || 0));
       const str = JSON.stringify(rooms);
@@ -288,9 +291,10 @@ export function listenRecentChats(callback) {
         lastSender: data.lastSender || '',
         lastAtText: data.lastAtText || '',
         unread: Number(data.unreadForStaff || 0),
-        count: Number(data.count || 0)
+        count: Number(data.count || 0),
+        closed: data.closedByStaff === true
       };
-    }).filter(x => x.room)
+    }).filter(x => x.room && !(x.closed && Number(x.unread || 0) === 0))
       .sort((a,b) => new Date(b.lastAtText || 0) - new Date(a.lastAtText || 0));
     callback(rooms);
   }, err => {
@@ -316,6 +320,28 @@ export async function markChatSeen(room) {
   await Promise.all(updates);
 }
 
+
+export async function closeChatRoom(room) {
+  const r = safeRoom(room);
+  if (!r) return;
+  if (isDemo) {
+    const closedRooms = readLS(LS_CLOSED_CHATS, {});
+    closedRooms[r] = new Date().toISOString();
+    writeLS(LS_CLOSED_CHATS, closedRooms);
+    await markChatSeen(r);
+    return;
+  }
+  await setDoc(doc(db, 'chatRooms', r), {
+    room:r,
+    unreadForStaff:0,
+    closedByStaff:true,
+    closedAtText:new Date().toISOString(),
+    staffSeenAtText:new Date().toISOString(),
+    updatedAt:serverTimestamp()
+  }, { merge:true });
+  await markChatSeen(r).catch(() => {});
+}
+
 export async function sendChat(room, sender, text) {
   const r = safeRoom(room);
   const payload = { room:r, sender, text:String(text || '').trim(), createdAtText:new Date().toISOString() };
@@ -324,6 +350,10 @@ export async function sendChat(room, sender, text) {
     const key = LS_CHAT + r;
     const msgs = readLS(key, []);
     msgs.push({ ...payload, id:uid('msg') });
+    if (sender !== 'staff') {
+      const closedRooms = readLS(LS_CLOSED_CHATS, {});
+      if (closedRooms[r]) { delete closedRooms[r]; writeLS(LS_CLOSED_CHATS, closedRooms); }
+    }
     writeLS(key, msgs);
     return;
   }
@@ -337,7 +367,11 @@ export async function sendChat(room, sender, text) {
     updatedAt:serverTimestamp(),
     count:increment(1)
   };
-  if (sender !== 'staff') roomSummary.unreadForStaff = increment(1);
+  if (sender !== 'staff') {
+    roomSummary.unreadForStaff = increment(1);
+    roomSummary.closedByStaff = false;
+    roomSummary.reopenedAtText = payload.createdAtText;
+  }
   await setDoc(doc(db, 'chatRooms', r), roomSummary, { merge:true });
 }
 
