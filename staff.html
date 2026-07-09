@@ -20,11 +20,23 @@
   <header class="header">
     <div class="brand"><div class="logo">L</div><div><div id="hotelName">LAYA Resort</div><small style="color:var(--muted)">Room Service Staff Board</small></div></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+      <button id="enableAlerts" class="secondary" type="button">เปิดเสียง/แจ้งเตือน</button>
       <a class="secondary" href="./admin.html">Admin Menu</a>
       <a class="secondary" href="./qr.html">QR</a>
       <span id="modePill" class="mode-pill hidden">Demo</span>
     </div>
   </header>
+
+
+  <div id="staffAlert" class="staff-alert hidden" role="alert" aria-live="assertive">
+    <div class="staff-alert-icon">🔔</div>
+    <div class="staff-alert-body">
+      <strong id="staffAlertTitle">มีข้อความใหม่จากลูกค้า</strong>
+      <span id="staffAlertText">ลูกค้าส่งข้อความใหม่</span>
+    </div>
+    <button id="alertOpenChat" class="alert-open" type="button">เปิดแชท</button>
+    <button id="alertDismiss" class="alert-close" type="button" aria-label="ปิดแจ้งเตือน">×</button>
+  </div>
 
   <main class="container">
     <section class="hero">

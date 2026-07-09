@@ -9,6 +9,12 @@ let knownNewOrderIds = new Set();
 let firstLoad = true;
 let chatSummaries = [];
 let staffReadRooms = new Set();
+let chatFirstLoad = true;
+let knownChatRooms = new Map();
+let pendingAlertRoom = '';
+let alertToneTimer = null;
+let titleFlashTimer = null;
+const originalTitle = document.title;
 
 $('hotelName').textContent = HOTEL_NAME;
 if (isDemo) { $('modePill').classList.remove('hidden'); $('modePill').classList.add('demo'); $('modePill').textContent = 'Demo Mode'; }
@@ -17,6 +23,13 @@ function unlock() { sessionStorage.setItem('layaStaffOk', '1'); $('pinGate').cla
 if (sessionStorage.getItem('layaStaffOk') === '1') unlock();
 $('pinBtn').addEventListener('click', () => { if ($('pinInput').value === STAFF_PIN) unlock(); else $('pinErr').classList.remove('hidden'); });
 $('pinInput').addEventListener('keydown', e => { if (e.key === 'Enter') $('pinBtn').click(); });
+
+if ($('enableAlerts')) $('enableAlerts').addEventListener('click', enableStaffAlerts);
+if ($('alertOpenChat')) $('alertOpenChat').addEventListener('click', () => {
+  if (pendingAlertRoom) openChat(pendingAlertRoom);
+  hideStaffAlert();
+});
+if ($('alertDismiss')) $('alertDismiss').addEventListener('click', hideStaffAlert);
 
 function start() {
   listenOrders((orders) => {
@@ -27,6 +40,7 @@ function start() {
   listenRecentChats((rooms) => {
     chatSummaries = rooms || [];
     renderChatInbox();
+    checkChatAlerts(chatSummaries);
   });
 }
 
@@ -94,6 +108,148 @@ function beep() {
 }
 
 
+function enableStaffAlerts() {
+  unlockAudioForBrowser();
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission().then(() => updateAlertButton());
+  } else updateAlertButton();
+  showSmallNotice('เปิดระบบแจ้งเตือนแล้ว ถ้าลูกค้าทักมา จะมีเสียงและป๊อปอัปบน Staff Board');
+}
+
+function updateAlertButton() {
+  const btn = $('enableAlerts');
+  if (!btn) return;
+  if ('Notification' in window && Notification.permission === 'granted') btn.textContent = 'แจ้งเตือนเปิดแล้ว';
+  else btn.textContent = 'เปิดเสียง/แจ้งเตือน';
+}
+
+function unlockAudioForBrowser() {
+  // Browsers often block sound until staff clicks once. This silent tone unlocks audio after login/button click.
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    const ctx = new Ctx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    gain.gain.value = 0.0001;
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start();
+    setTimeout(() => { try { osc.stop(); ctx.close(); } catch {} }, 40);
+  } catch {}
+}
+
+function checkChatAlerts(rooms) {
+  const activeChats = (rooms || []).filter(c => c && c.room && Number(c.unread || 0) > 0 && c.lastSender !== 'staff');
+
+  // First load: if there are already unread guest messages, still show a visible alert so staff won't miss them.
+  if (chatFirstLoad) {
+    activeChats.forEach(c => knownChatRooms.set(c.room, { unread:Number(c.unread||0), lastAtText:c.lastAtText || '' }));
+    chatFirstLoad = false;
+    if (activeChats.length) triggerChatAlert(activeChats[0], activeChats.length, true);
+    return;
+  }
+
+  let newest = null;
+  for (const c of activeChats) {
+    const prev = knownChatRooms.get(c.room) || { unread:0, lastAtText:'' };
+    const unread = Number(c.unread || 0);
+    const changed = unread > Number(prev.unread || 0) || String(c.lastAtText || '') !== String(prev.lastAtText || '');
+    if (changed && (!newest || new Date(c.lastAtText || 0) > new Date(newest.lastAtText || 0))) newest = c;
+  }
+
+  (rooms || []).forEach(c => {
+    if (c && c.room) knownChatRooms.set(c.room, { unread:Number(c.unread||0), lastAtText:c.lastAtText || '' });
+  });
+
+  if (newest) triggerChatAlert(newest, activeChats.length, false);
+}
+
+function triggerChatAlert(chat, totalUnreadRooms=1, fromExisting=false) {
+  if (!chat || !chat.room) return;
+  pendingAlertRoom = chat.room;
+  const title = totalUnreadRooms > 1
+    ? `มีข้อความลูกค้า ${totalUnreadRooms} ห้อง`
+    : `มีข้อความใหม่จาก Room ${chat.room}`;
+  const body = `${fromExisting ? 'มีแชทค้าง: ' : ''}${chat.lastMessage || 'ลูกค้าส่งข้อความใหม่'}`;
+  showStaffAlert(title, body, chat.room);
+  playChatAlertTone();
+  vibrateStaffDevice();
+  flashPageTitle(`🔔 Room ${chat.room}`);
+  sendDesktopNotification(title, body, chat.room);
+}
+
+function showStaffAlert(title, body, room) {
+  const box = $('staffAlert');
+  if (!box) return;
+  $('staffAlertTitle').textContent = title;
+  $('staffAlertText').textContent = body;
+  box.dataset.room = room || '';
+  box.classList.remove('hidden');
+  box.classList.add('shake-once');
+  setTimeout(() => box.classList.remove('shake-once'), 900);
+}
+
+function hideStaffAlert() {
+  const box = $('staffAlert');
+  if (box) box.classList.add('hidden');
+  stopTitleFlash();
+  if (alertToneTimer) { clearInterval(alertToneTimer); alertToneTimer = null; }
+}
+
+function playChatAlertTone() {
+  beep();
+  setTimeout(beep, 260);
+  if (alertToneTimer) clearInterval(alertToneTimer);
+  // repeat gently while the alert is still visible, so staff notices even when away from the screen
+  let count = 0;
+  alertToneTimer = setInterval(() => {
+    const box = $('staffAlert');
+    if (!box || box.classList.contains('hidden') || count >= 5) {
+      clearInterval(alertToneTimer); alertToneTimer = null; return;
+    }
+    beep();
+    count += 1;
+  }, 4500);
+}
+
+function vibrateStaffDevice() {
+  try { if (navigator.vibrate) navigator.vibrate([250, 100, 250]); } catch {}
+}
+
+function flashPageTitle(text) {
+  stopTitleFlash();
+  let on = false;
+  titleFlashTimer = setInterval(() => {
+    document.title = on ? originalTitle : text;
+    on = !on;
+  }, 900);
+}
+
+function stopTitleFlash() {
+  if (titleFlashTimer) clearInterval(titleFlashTimer);
+  titleFlashTimer = null;
+  document.title = originalTitle;
+}
+
+function sendDesktopNotification(title, body, room) {
+  try {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    const n = new Notification(title, { body, tag:`laya-chat-${room}`, renotify:true, silent:false });
+    n.onclick = () => { window.focus(); openChat(room); hideStaffAlert(); n.close(); };
+    setTimeout(() => n.close(), 9000);
+  } catch {}
+}
+
+function showSmallNotice(text) {
+  const title = 'ระบบแจ้งเตือนพร้อมใช้งาน';
+  showStaffAlert(title, text, pendingAlertRoom || '');
+  setTimeout(() => {
+    const box = $('staffAlert');
+    if (box && box.dataset.room === '') box.classList.add('hidden');
+  }, 3000);
+}
+
+
 function renderChatInbox() {
   const inbox = $('chatInbox');
   const summary = $('chatInboxSummary');
@@ -128,10 +284,15 @@ async function openChat(room) {
   if (unsubChat) unsubChat();
   unsubChat = listenChat(activeRoom, renderChat);
   await markChatSeen(activeRoom).catch(() => {});
+  knownChatRooms.set(activeRoom, { unread:0, lastAtText:(knownChatRooms.get(activeRoom)||{}).lastAtText || '' });
+  if (pendingAlertRoom === activeRoom) hideStaffAlert();
   renderChatInbox();
 }
 function renderChat(messages) {
-  if (activeRoom) markChatSeen(activeRoom).catch(() => {});
+  if (activeRoom) {
+    markChatSeen(activeRoom).catch(() => {});
+    if (pendingAlertRoom === activeRoom) hideStaffAlert();
+  }
   $('chatMessages').innerHTML = messages.length ? messages.map(m => `<div class="msg ${m.sender === 'staff' ? 'me' : ''}">${escapeHtml(m.text)}<small>${m.sender === 'staff' ? 'พนักงาน' : m.sender === 'guest' ? 'ลูกค้า' : 'ระบบ'} • ${fmtDate(m.createdAtText)}</small></div>`).join('') : '<div class="empty">ยังไม่มีข้อความ</div>';
   $('chatMessages').scrollTop = $('chatMessages').scrollHeight;
 }
