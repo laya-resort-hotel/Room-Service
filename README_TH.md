@@ -50,3 +50,12 @@
 - ควรเปลี่ยน `STAFF_PIN` ใน `firebase-config.js` ก่อนใช้งานจริง
 - QR ตามเลขห้องอย่างเดียวเดาได้ง่าย ถ้าจะใช้จริงควรเพิ่ม token ต่อห้อง หรือระบบ Login พนักงาน/ลูกค้าในเวอร์ชันถัดไป
 - ถ้าต้องการให้เหมือนแอปโรงแรมมากขึ้น ควรเพิ่มหน้า Hotel Info, Housekeeping Request, Maintenance Request, Transportation Booking แยกจาก Chat
+
+
+## Firebase ที่เชื่อมแล้ว
+
+ไฟล์ชุดนี้เชื่อม Firebase Project: `roomservice-3f58c` แล้ว และตั้ง `DEMO_MODE = false` ใน `firebase-config.js`
+
+หลังอัปโหลดขึ้น GitHub แล้ว ให้เข้า Firebase Console > Firestore Database > Rules แล้ววาง rules จากไฟล์ `firestore-rules.txt` จากนั้นกด Publish เพื่อให้ระบบอ่าน/เขียนเมนู ออเดอร์ และแชทได้สำหรับการทดสอบ
+
+หมายเหตุ: Rules ในไฟล์นี้เปิดกว้างเพื่อทดสอบเท่านั้น ก่อนใช้งานจริงควรทำระบบ Login พนักงาน/แอดมิน และจำกัดสิทธิ์การเขียนข้อมูล

@@ -1,16 +1,16 @@
 // LAYA Room Service QR - Firebase Config
-// 1) ทดสอบก่อน: DEMO_MODE = true ใช้ข้อมูลจำลองในเครื่องเดียว
-// 2) ใช้งานจริง: วาง Firebase Web Config แล้วเปลี่ยน DEMO_MODE = false
+// ใช้งานจริงกับ Firebase Project: roomservice-3f58c
 
 export const HOTEL_NAME = "LAYA Resort";
 export const STAFF_PIN = "1234"; // เปลี่ยนรหัสพนักงาน/แอดมินก่อนใช้งานจริง
-export const DEMO_MODE = true;
+export const DEMO_MODE = false;
 
 export const firebaseConfig = {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
+  apiKey: "AIzaSyDTYgujfyP2uZnQ-cW_nYdjHwWkNI65KIA",
+  authDomain: "roomservice-3f58c.firebaseapp.com",
+  projectId: "roomservice-3f58c",
+  storageBucket: "roomservice-3f58c.firebasestorage.app",
+  messagingSenderId: "843976616615",
+  appId: "1:843976616615:web:f1727b4b057adb00fdc982",
+  measurementId: "G-XD079MDFLB"
 };
