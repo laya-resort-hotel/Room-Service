@@ -16,6 +16,9 @@ let alertToneTimer = null;
 let alertSoundEnabled = localStorage.getItem('laya.rs.staffAlertSound') !== '0';
 let titleFlashTimer = null;
 const originalTitle = document.title;
+const ALERT_SOUND_URL = './alert-sound.mp3';
+let alertAudio = null;
+let fallbackToneTimer = null;
 
 $('hotelName').textContent = HOTEL_NAME;
 if (isDemo) { $('modePill').classList.remove('hidden'); $('modePill').classList.add('demo'); $('modePill').textContent = 'Demo Mode'; }
@@ -95,21 +98,42 @@ function orderHtml(o) {
   </article>`;
 }
 function checkNewOrderSound(orders) {
-  const newIds = new Set(orders.filter(o => o.status === 'new').map(o => o.id));
+  const newOrders = orders.filter(o => o.status === 'new');
+  const newIds = new Set(newOrders.map(o => o.id));
   if (!firstLoad) {
-    for (const id of newIds) if (!knownNewOrderIds.has(id)) beep();
+    const justArrived = newOrders.filter(o => !knownNewOrderIds.has(o.id));
+    if (justArrived.length) {
+      const newestOrder = justArrived.sort((a,b) => new Date(b.createdAtText || 0) - new Date(a.createdAtText || 0))[0];
+      triggerOrderAlert(newestOrder, justArrived.length);
+    }
   }
   knownNewOrderIds = newIds;
   firstLoad = false;
 }
+function triggerOrderAlert(order, count=1) {
+  if (!order) return;
+  const room = String(order.room || '').toUpperCase();
+  pendingAlertRoom = room;
+  const title = count > 1 ? `มีออเดอร์ใหม่ ${count} รายการ` : `มีออเดอร์ใหม่จาก Room ${room}`;
+  const ref = String(order.id || '').slice(-6).toUpperCase();
+  const body = `ยอด ${thb(order.total || 0)} • Ref ${ref} • รีบตรวจสอบใน Order Board`;
+  showStaffAlert(title, body, room);
+  if (alertSoundEnabled) playAlertSoundLoop();
+  vibrateStaffDevice();
+  flashPageTitle(`🔔 Order ${room}`);
+  sendDesktopNotification(title, body, room);
+}
 function beep() {
+  playAlertSoundOnce().catch(() => fallbackBeep());
+}
+function fallbackBeep() {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.connect(gain); gain.connect(ctx.destination);
-    osc.frequency.value = 880; gain.gain.value = .08;
-    osc.start(); setTimeout(() => { osc.stop(); ctx.close(); }, 240);
+    osc.frequency.value = 880; gain.gain.value = .12;
+    osc.start(); setTimeout(() => { osc.stop(); ctx.close(); }, 280);
   } catch {}
 }
 
@@ -140,11 +164,22 @@ function updateAlertButton() {
 
 function stopAlertSoundOnly() {
   if (alertToneTimer) { clearInterval(alertToneTimer); alertToneTimer = null; }
+  if (fallbackToneTimer) { clearInterval(fallbackToneTimer); fallbackToneTimer = null; }
+  stopCustomAlertAudio();
   stopTitleFlash();
 }
 
 function unlockAudioForBrowser() {
-  // Browsers often block sound until staff clicks once. This silent tone unlocks audio after login/button click.
+  // Browsers often block sound until staff clicks once. This silent tone / muted audio unlocks sound after login/button click.
+  try {
+    getAlertAudio();
+    alertAudio.muted = true;
+    alertAudio.play().then(() => {
+      alertAudio.pause();
+      alertAudio.currentTime = 0;
+      alertAudio.muted = false;
+    }).catch(() => { alertAudio.muted = false; });
+  } catch {}
   try {
     const Ctx = window.AudioContext || window.webkitAudioContext;
     if (!Ctx) return;
@@ -216,37 +251,73 @@ function hideStaffAlert() {
 }
 
 function playChatAlertTone() {
-  loudAlertBeep();
+  playAlertSoundLoop();
+}
+
+function getAlertAudio() {
+  if (!alertAudio) {
+    alertAudio = new Audio(ALERT_SOUND_URL);
+    alertAudio.preload = 'auto';
+    alertAudio.volume = 1;
+  }
+  return alertAudio;
+}
+
+async function playAlertSoundOnce() {
+  const audio = getAlertAudio();
+  audio.loop = false;
+  audio.volume = 1;
+  audio.currentTime = 0;
+  await audio.play();
+}
+
+function playAlertSoundLoop() {
+  if (!alertSoundEnabled) return;
+  stopCustomAlertAudio();
+  try {
+    const audio = getAlertAudio();
+    audio.loop = true;
+    audio.volume = 1;
+    audio.currentTime = 0;
+    const playPromise = audio.play();
+    if (playPromise && typeof playPromise.catch === 'function') {
+      playPromise.catch(() => startFallbackLoopTone());
+    }
+  } catch {
+    startFallbackLoopTone();
+  }
   if (alertToneTimer) clearInterval(alertToneTimer);
-  // ดังซ้ำไปเรื่อย ๆ จนกว่าพนักงานจะกดเปิดแชท / หยุดเสียง / ปิดแจ้งเตือน
+  // ตรวจซ้ำว่ากล่องแจ้งเตือนยังเปิดอยู่ไหม ถ้าปิดแล้วให้หยุดเสียงทันที
   alertToneTimer = setInterval(() => {
     const box = $('staffAlert');
     if (!box || box.classList.contains('hidden') || !alertSoundEnabled) {
-      clearInterval(alertToneTimer); alertToneTimer = null; return;
+      stopAlertSoundOnly();
     }
-    loudAlertBeep();
-  }, 1300);
+  }, 900);
 }
 
-function loudAlertBeep() {
+function stopCustomAlertAudio() {
   try {
-    const Ctx = window.AudioContext || window.webkitAudioContext;
-    const ctx = new Ctx();
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.22, ctx.currentTime + 0.03);
-    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.82);
-    gain.connect(ctx.destination);
-    [880, 1175, 880].forEach((freq, idx) => {
-      const osc = ctx.createOscillator();
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.22);
-      osc.connect(gain);
-      osc.start(ctx.currentTime + idx * 0.22);
-      osc.stop(ctx.currentTime + idx * 0.22 + 0.18);
-    });
-    setTimeout(() => { try { ctx.close(); } catch {} }, 1000);
-  } catch { beep(); setTimeout(beep, 220); }
+    if (alertAudio) {
+      alertAudio.pause();
+      alertAudio.currentTime = 0;
+      alertAudio.loop = false;
+    }
+  } catch {}
+}
+
+function startFallbackLoopTone() {
+  fallbackBeep();
+  if (fallbackToneTimer) clearInterval(fallbackToneTimer);
+  fallbackToneTimer = setInterval(() => {
+    const box = $('staffAlert');
+    if (!box || box.classList.contains('hidden') || !alertSoundEnabled) {
+      if (fallbackToneTimer) clearInterval(fallbackToneTimer);
+      fallbackToneTimer = null;
+      return;
+    }
+    fallbackBeep();
+  }, 1300);
 }
 
 function vibrateStaffDevice() {

@@ -175,3 +175,10 @@ match /chatRooms/{roomId} {
 ไฟล์ที่เกี่ยวข้อง: `admin.html`, `admin.js`, `customer.js`, `firebase-service.js`, `styles.css`, `firestore-rules.txt`, `storage-rules.txt`
 
 ต้องเปิด Firebase Storage และเพิ่ม Rules ให้ `site-images/{allPaths=**}` อ่าน/เขียนได้สำหรับช่วงทดสอบ
+
+## v3.7 Custom Alert Sound
+- เพิ่มไฟล์ `alert-sound.mp3` จากเสียงที่ผู้ใช้อัปโหลด
+- ใช้เสียงนี้เมื่อมีออเดอร์ใหม่จากลูกค้า
+- ใช้เสียงนี้เมื่อมีแชทใหม่จากลูกค้า
+- เสียงจะเล่นซ้ำจนกว่าพนักงานจะกดเปิดแชท / หยุดเสียง / ปิดแจ้งเตือน
+- ถ้า Browser บล็อกเสียง ให้พนักงานกดปุ่ม “เสียงแจ้งเตือนเปิดอยู่” หรือ Login หน้า Staff Board อย่างน้อย 1 ครั้ง
