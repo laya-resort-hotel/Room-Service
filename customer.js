@@ -67,8 +67,56 @@ if (isDemo) {
 }
 
 function t(key) { return I18N[lang]?.[key] || I18N.EN[key] || key; }
-function itemName(item) { return item[`name${lang}`] || item.nameTh || item.nameEn || item.nameZh || item.nameRu || 'Unnamed item'; }
-function itemDesc(item) { return item[`description${lang}`] || item.description || item.descriptionTh || item.descriptionEn || item.descriptionZh || item.descriptionRu || item.nameEn || item.category || ''; }
+
+// Firestore fields use nameTh/nameEn/nameZh/nameRu, not nameTH/nameEN.
+// This map keeps menu names/descriptions changing correctly when guests switch language.
+const MENU_LANG_FIELDS = {
+  TH: { name: 'nameTh', description: 'descriptionTh' },
+  EN: { name: 'nameEn', description: 'descriptionEn' },
+  ZH: { name: 'nameZh', description: 'descriptionZh' },
+  RU: { name: 'nameRu', description: 'descriptionRu' }
+};
+
+function fieldValue(item, field) { return String(item?.[field] || '').trim(); }
+
+function itemName(item, targetLang = lang) {
+  const preferred = MENU_LANG_FIELDS[targetLang]?.name || 'nameEn';
+  const fallbackOrder = targetLang === 'TH'
+    ? ['nameTh', 'nameEn', 'nameZh', 'nameRu']
+    : targetLang === 'EN'
+      ? ['nameEn', 'nameTh', 'nameZh', 'nameRu']
+      : [preferred, 'nameEn', 'nameTh', 'nameZh', 'nameRu'];
+
+  for (const key of fallbackOrder) {
+    const value = fieldValue(item, key);
+    if (value) return value;
+  }
+  return 'Unnamed item';
+}
+
+function itemSecondaryName(item) {
+  const fallbackLang = lang === 'TH' ? 'EN' : lang === 'EN' ? 'TH' : 'EN';
+  const secondary = itemName(item, fallbackLang);
+  const primary = itemName(item, lang);
+  if (!secondary || secondary === primary || secondary === 'Unnamed item') return item.category || '';
+  return secondary;
+}
+
+function itemDesc(item, targetLang = lang) {
+  const preferred = MENU_LANG_FIELDS[targetLang]?.description || 'descriptionEn';
+  const fallbackOrder = targetLang === 'TH'
+    ? ['descriptionTh', 'description', 'descriptionEn', 'descriptionZh', 'descriptionRu']
+    : targetLang === 'EN'
+      ? ['descriptionEn', 'descriptionTh', 'description', 'descriptionZh', 'descriptionRu']
+      : [preferred, 'descriptionEn', 'descriptionTh', 'description', 'descriptionZh', 'descriptionRu'];
+
+  for (const key of fallbackOrder) {
+    const value = fieldValue(item, key);
+    if (value) return value;
+  }
+  return itemName(item, targetLang) || item.category || '';
+}
+
 function categoryLabel(cat) { return cat === 'All' ? t('all') : cat; }
 function messageFor(obj) { return typeof obj === 'string' ? obj : (obj?.[lang] || obj?.TH || obj?.EN || ''); }
 
@@ -240,7 +288,7 @@ function productCard(item) {
       <div class="product-body">
         <button class="add-btn" data-plus="${escapeAttr(item.id)}" aria-label="Add ${escapeAttr(name)}">+</button>
         ${qty ? `<span class="qty-badge">${qty}</span>` : ''}
-        <div class="product-tags">${escapeHtml(item.tags || item.nameEn || 'Room Service')}</div>
+        <div class="product-tags">${escapeHtml(itemSecondaryName(item) || item.tags || 'Room Service')}</div>
         <h4>${escapeHtml(name)}</h4>
         <div class="product-price">${thb(item.price)}</div>
       </div>

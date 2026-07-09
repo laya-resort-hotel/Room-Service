@@ -195,3 +195,15 @@ match /chatRooms/{roomId} {
 - ราคาอยู่ตำแหน่งล่างสุดเหมือนกันทุกการ์ด
 
 หลังอัปโหลดขึ้น GitHub ให้เปิดหน้าเว็บลูกค้าแล้วกด Ctrl + F5 หรือเปิดแบบ Incognito เพื่อเคลียร์ cache CSS
+
+
+## v3.9 Language Menu Fix
+
+แก้ไขการเปลี่ยนภาษาในหน้าลูกค้าให้ชื่อเมนูเปลี่ยนตามภาษาที่เลือกจริง:
+
+- TH ใช้ `nameTh`
+- EN ใช้ `nameEn`
+- 中文 ใช้ `nameZh`
+- RU ใช้ `nameRu`
+
+และรายละเอียดเมนูจะใช้ `descriptionTh / descriptionEn / descriptionZh / descriptionRu` ตามภาษาที่เลือก ถ้าภาษานั้นยังไม่ได้ใส่ ระบบจะ fallback ไปภาษาอังกฤษหรือภาษาไทยชั่วคราว
