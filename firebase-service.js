@@ -1,7 +1,7 @@
 import { firebaseConfig, DEMO_MODE } from './firebase-config.js';
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import {
-  getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot,
+  getFirestore, collection, collectionGroup, doc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot,
   serverTimestamp, getDocs
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import {
@@ -247,6 +247,73 @@ export function listenChat(room, callback) {
     const msgs = snap.docs.map(d => ({ id:d.id, ...d.data() })).sort((a,b) => new Date(a.createdAtText || 0) - new Date(b.createdAtText || 0));
     callback(msgs);
   }, err => console.error('listenChat error', err));
+}
+
+
+export function listenRecentChats(callback) {
+  if (isDemo) {
+    let last = '';
+    const emit = () => {
+      const rooms = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (!key || !key.startsWith(LS_CHAT)) continue;
+        const room = key.slice(LS_CHAT.length);
+        const msgs = readLS(key, []).sort((a,b) => new Date(a.createdAtText || 0) - new Date(b.createdAtText || 0));
+        if (!msgs.length) continue;
+        const lastMsg = msgs[msgs.length - 1];
+        const unread = msgs.filter(m => m.sender !== 'staff' && !m.staffSeenAtText).length;
+        rooms.push({ room, lastMessage:lastMsg.text || '', lastSender:lastMsg.sender || '', lastAtText:lastMsg.createdAtText || '', unread, count:msgs.length });
+      }
+      rooms.sort((a,b) => new Date(b.lastAtText || 0) - new Date(a.lastAtText || 0));
+      const str = JSON.stringify(rooms);
+      if (str !== last) { last = str; callback(rooms); }
+    };
+    emit();
+    const timer = setInterval(emit, 900);
+    window.addEventListener('storage', emit);
+    window.addEventListener('laya-local-change', emit);
+    return () => { clearInterval(timer); window.removeEventListener('storage', emit); window.removeEventListener('laya-local-change', emit); };
+  }
+  return onSnapshot(collectionGroup(db, 'messages'), snap => {
+    const grouped = new Map();
+    snap.docs.forEach(d => {
+      const data = { id:d.id, ...d.data() };
+      const room = safeRoom(data.room || d.ref.parent.parent?.id || '');
+      if (!room) return;
+      if (!grouped.has(room)) grouped.set(room, []);
+      grouped.get(room).push(data);
+    });
+    const rooms = Array.from(grouped.entries()).map(([room, msgs]) => {
+      msgs.sort((a,b) => new Date(a.createdAtText || 0) - new Date(b.createdAtText || 0));
+      const lastMsg = msgs[msgs.length - 1] || {};
+      return {
+        room,
+        lastMessage:lastMsg.text || '',
+        lastSender:lastMsg.sender || '',
+        lastAtText:lastMsg.createdAtText || '',
+        unread: msgs.filter(m => m.sender !== 'staff' && !m.staffSeenAtText).length,
+        count: msgs.length
+      };
+    }).sort((a,b) => new Date(b.lastAtText || 0) - new Date(a.lastAtText || 0));
+    callback(rooms);
+  }, err => console.error('listenRecentChats error', err));
+}
+
+export async function markChatSeen(room) {
+  const r = safeRoom(room);
+  if (!r) return;
+  if (isDemo) {
+    const key = LS_CHAT + r;
+    const msgs = readLS(key, []).map(m => m.sender !== 'staff' ? { ...m, staffSeenAtText:new Date().toISOString() } : m);
+    writeLS(key, msgs);
+    return;
+  }
+  const snap = await getDocs(collection(db, 'chats', r, 'messages'));
+  const updates = snap.docs
+    .filter(d => d.data().sender !== 'staff' && !d.data().staffSeenAtText)
+    .map(d => updateDoc(d.ref, { staffSeenAtText:new Date().toISOString() }));
+  await Promise.all(updates);
 }
 
 export async function sendChat(room, sender, text) {

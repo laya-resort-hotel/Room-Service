@@ -1,5 +1,5 @@
 import { HOTEL_NAME, STAFF_PIN } from './firebase-config.js';
-import { isDemo, listenOrders, updateOrderStatus, listenChat, sendChat, thb, fmtDate, statusText, downloadCsv } from './firebase-service.js';
+import { isDemo, listenOrders, updateOrderStatus, listenChat, sendChat, listenRecentChats, markChatSeen, thb, fmtDate, statusText, downloadCsv } from './firebase-service.js';
 
 const $ = (id) => document.getElementById(id);
 let allOrders = [];
@@ -7,6 +7,8 @@ let activeRoom = '';
 let unsubChat = null;
 let knownNewOrderIds = new Set();
 let firstLoad = true;
+let chatSummaries = [];
+let staffReadRooms = new Set();
 
 $('hotelName').textContent = HOTEL_NAME;
 if (isDemo) { $('modePill').classList.remove('hidden'); $('modePill').classList.add('demo'); $('modePill').textContent = 'Demo Mode'; }
@@ -21,6 +23,10 @@ function start() {
     allOrders = orders;
     checkNewOrderSound(orders);
     renderOrders();
+  });
+  listenRecentChats((rooms) => {
+    chatSummaries = rooms || [];
+    renderChatInbox();
   });
 }
 
@@ -87,17 +93,45 @@ function beep() {
   } catch {}
 }
 
+
+function renderChatInbox() {
+  const inbox = $('chatInbox');
+  const summary = $('chatInboxSummary');
+  if (!inbox) return;
+  const activeChats = chatSummaries.filter(c => c && c.room);
+  const totalUnread = activeChats.reduce((sum, c) => sum + Number(c.unread || 0), 0);
+  if (summary) summary.textContent = activeChats.length ? `${activeChats.length} ห้อง • ยังไม่อ่าน ${totalUnread}` : 'ยังไม่มีแชท';
+  if (!activeChats.length) {
+    inbox.innerHTML = '<div class="empty">ยังไม่มีแชทจากลูกค้า</div>';
+    return;
+  }
+  inbox.innerHTML = activeChats.map(c => {
+    const unread = Number(c.unread || 0);
+    const activeCls = activeRoom === c.room ? ' active' : '';
+    const senderText = c.lastSender === 'staff' ? 'พนักงาน' : c.lastSender === 'guest' ? 'ลูกค้า' : 'ระบบ';
+    return `<button class="chat-inbox-item${activeCls}" data-inbox-room="${escapeHtml(c.room)}">
+      <span class="chat-room-line"><strong>Room ${escapeHtml(c.room)}</strong>${unread ? `<em>${unread}</em>` : ''}</span>
+      <span class="chat-last-line">${escapeHtml(senderText)}: ${escapeHtml(c.lastMessage || '')}</span>
+      <small>${fmtDate(c.lastAtText)}</small>
+    </button>`;
+  }).join('');
+  document.querySelectorAll('[data-inbox-room]').forEach(btn => btn.addEventListener('click', () => openChat(btn.dataset.inboxRoom)));
+}
+
 $('openChat').addEventListener('click', () => openChat($('chatRoom').value));
 $('chatRoom').addEventListener('keydown', e => { if (e.key === 'Enter') openChat($('chatRoom').value); });
-function openChat(room) {
+async function openChat(room) {
   activeRoom = String(room || '').toUpperCase().trim();
   if (!activeRoom) return;
   $('chatRoom').value = activeRoom;
   $('chatTitle').innerHTML = `กำลังคุยกับ <strong>Room ${escapeHtml(activeRoom)}</strong>`;
   if (unsubChat) unsubChat();
   unsubChat = listenChat(activeRoom, renderChat);
+  await markChatSeen(activeRoom).catch(() => {});
+  renderChatInbox();
 }
 function renderChat(messages) {
+  if (activeRoom) markChatSeen(activeRoom).catch(() => {});
   $('chatMessages').innerHTML = messages.length ? messages.map(m => `<div class="msg ${m.sender === 'staff' ? 'me' : ''}">${escapeHtml(m.text)}<small>${m.sender === 'staff' ? 'พนักงาน' : m.sender === 'guest' ? 'ลูกค้า' : 'ระบบ'} • ${fmtDate(m.createdAtText)}</small></div>`).join('') : '<div class="empty">ยังไม่มีข้อความ</div>';
   $('chatMessages').scrollTop = $('chatMessages').scrollHeight;
 }
