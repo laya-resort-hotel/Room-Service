@@ -1,11 +1,16 @@
 import { HOTEL_NAME, STAFF_PIN } from './firebase-config.js';
-import { isDemo, listenMenu, saveMenuItem, removeMenuItem, seedSampleMenuToFirebase, uploadMenuImage, thb } from './firebase-service.js';
+import { isDemo, listenMenu, listenSiteSettings, saveSiteSettings, saveMenuItem, removeMenuItem, seedSampleMenuToFirebase, uploadMenuImage, uploadSiteImage, DEFAULT_SITE_SETTINGS, thb } from './firebase-service.js';
 
 const $ = id => document.getElementById(id);
 let menu = [];
 let pendingImageUpload = null;
 let pendingPreviewUrl = '';
 let currentImageStoragePath = '';
+let currentCoverStoragePath = '';
+let pendingCoverUpload = null;
+let pendingCoverPreviewUrl = '';
+let currentSiteSettings = { ...DEFAULT_SITE_SETTINGS };
+let siteSettingsUnsub = null;
 
 $('hotelName').textContent = HOTEL_NAME;
 if (isDemo) { $('modePill').classList.remove('hidden'); $('modePill').classList.add('demo'); $('modePill').textContent = 'Demo Mode'; }
@@ -26,6 +31,14 @@ function start() {
     setAdminStatus('โหลดข้อมูลจาก Firebase ไม่ได้: ' + friendlyFirebaseError(err), 'bad');
     $('menuCount').textContent = 'โหลดเมนูไม่ได้';
     $('menuTable').innerHTML = '<tr><td colspan="6" class="empty">กรุณาตรวจ Firestore Database และ Rules ใน Firebase</td></tr>';
+  });
+  if (siteSettingsUnsub) siteSettingsUnsub();
+  siteSettingsUnsub = listenSiteSettings((settings) => {
+    currentSiteSettings = { ...DEFAULT_SITE_SETTINGS, ...settings };
+    renderSiteSettingsForm();
+  }, (err) => {
+    console.error(err);
+    setSiteStatus('โหลดการตั้งค่า Cover ไม่ได้: ' + friendlyFirebaseError(err), 'bad');
   });
 }
 
@@ -160,6 +173,116 @@ $('imageUpload').addEventListener('change', async () => {
     alert('ย่อรูปไม่ได้ กรุณาลองเลือกรูปอื่น หรือใช้รูป URL แทน');
   }
 });
+
+
+const coverImageUrlEl = $('coverImageUrl');
+const coverImageUploadEl = $('coverImageUpload');
+const saveSiteSettingsBtn = $('saveSiteSettings');
+const resetCoverDefaultBtn = $('resetCoverDefault');
+
+if (coverImageUrlEl) {
+  coverImageUrlEl.addEventListener('input', () => {
+    clearPendingCoverUpload(false);
+    currentCoverStoragePath = '';
+    updateCoverPreview();
+  });
+}
+if (coverImageUploadEl) {
+  coverImageUploadEl.addEventListener('change', async () => {
+    const file = coverImageUploadEl.files?.[0];
+    if (!file) return;
+    try {
+      setSiteStatus('กำลังย่อรูป Cover ก่อนอัปโหลด...', 'info');
+      const blob = await resizeImageToBlob(file, 1600, 0.82);
+      clearPendingCoverUpload(false);
+      pendingCoverPreviewUrl = URL.createObjectURL(blob);
+      pendingCoverUpload = { blob, filename:file.name || 'cover.jpg' };
+      updateCoverPreview();
+      setSiteStatus(`เลือกรูป Cover แล้ว ขนาดหลังย่อประมาณ ${Math.round(blob.size / 1024)} KB กด “บันทึกรูป Cover” เพื่อใช้งาน`, 'good');
+    } catch (err) {
+      console.error(err);
+      setSiteStatus('ย่อรูป Cover ไม่ได้ กรุณาลองรูปอื่น', 'bad');
+      alert('ย่อรูป Cover ไม่ได้ กรุณาลองรูปอื่น');
+    }
+  });
+}
+if (saveSiteSettingsBtn) {
+  saveSiteSettingsBtn.addEventListener('click', async () => {
+    const oldText = saveSiteSettingsBtn.textContent;
+    saveSiteSettingsBtn.disabled = true;
+    saveSiteSettingsBtn.textContent = pendingCoverUpload ? 'กำลังอัปโหลด Cover...' : 'กำลังบันทึก...';
+    try {
+      let coverImage = coverImageUrlEl?.value.trim() || DEFAULT_SITE_SETTINGS.coverImage;
+      let coverImageStoragePath = currentCoverStoragePath;
+      if (pendingCoverUpload) {
+        const uploaded = await uploadSiteImage(pendingCoverUpload.blob, pendingCoverUpload.filename);
+        coverImage = uploaded.url;
+        coverImageStoragePath = uploaded.path;
+        if (coverImageUrlEl) coverImageUrlEl.value = coverImage;
+        saveSiteSettingsBtn.textContent = 'กำลังบันทึก...';
+      }
+      const hotelName = $('siteHotelName')?.value.trim() || HOTEL_NAME || DEFAULT_SITE_SETTINGS.hotelName;
+      await saveSiteSettings({ hotelName, coverImage, coverImageStoragePath, coverAlt:hotelName });
+      currentCoverStoragePath = coverImageStoragePath;
+      clearPendingCoverUpload(true);
+      updateCoverPreview();
+      setSiteStatus('บันทึก Cover สำเร็จแล้ว หน้า QR ลูกค้าจะเปลี่ยนตาม Realtime', 'good');
+      alert('บันทึก Cover สำเร็จแล้ว');
+    } catch (err) {
+      console.error(err);
+      setSiteStatus('บันทึก Cover ไม่ได้: ' + friendlyFirebaseError(err), 'bad');
+      alert('บันทึก Cover ไม่ได้: ' + friendlyFirebaseError(err));
+    } finally {
+      saveSiteSettingsBtn.disabled = false;
+      saveSiteSettingsBtn.textContent = oldText;
+    }
+  });
+}
+if (resetCoverDefaultBtn) {
+  resetCoverDefaultBtn.addEventListener('click', async () => {
+    if (!confirm('ต้องการกลับไปใช้รูป Cover เริ่มต้นใช่ไหม?')) return;
+    try {
+      await saveSiteSettings({ ...currentSiteSettings, coverImage:DEFAULT_SITE_SETTINGS.coverImage, coverImageStoragePath:'' });
+      currentCoverStoragePath = '';
+      clearPendingCoverUpload(true);
+      setSiteStatus('กลับไปใช้รูป Cover เริ่มต้นแล้ว', 'good');
+    } catch (err) {
+      console.error(err);
+      setSiteStatus('เปลี่ยนรูปเริ่มต้นไม่ได้: ' + friendlyFirebaseError(err), 'bad');
+    }
+  });
+}
+
+function renderSiteSettingsForm() {
+  if ($('siteHotelName')) $('siteHotelName').value = currentSiteSettings.hotelName || HOTEL_NAME || DEFAULT_SITE_SETTINGS.hotelName;
+  if (coverImageUrlEl) coverImageUrlEl.value = currentSiteSettings.coverImage || DEFAULT_SITE_SETTINGS.coverImage;
+  currentCoverStoragePath = currentSiteSettings.coverImageStoragePath || '';
+  if ($('hotelName')) $('hotelName').textContent = currentSiteSettings.hotelName || HOTEL_NAME;
+  updateCoverPreview();
+}
+
+function updateCoverPreview() {
+  const src = pendingCoverPreviewUrl || coverImageUrlEl?.value.trim() || '';
+  if (!$('coverPreviewWrap') || !$('coverPreview')) return;
+  if (!src) { $('coverPreviewWrap').classList.add('hidden'); $('coverPreview').removeAttribute('src'); return; }
+  $('coverPreview').src = src;
+  $('coverPreviewWrap').classList.remove('hidden');
+}
+
+function clearPendingCoverUpload(clearFileInput=true) {
+  pendingCoverUpload = null;
+  if (pendingCoverPreviewUrl) URL.revokeObjectURL(pendingCoverPreviewUrl);
+  pendingCoverPreviewUrl = '';
+  if (clearFileInput && coverImageUploadEl) coverImageUploadEl.value = '';
+}
+
+function setSiteStatus(message, type='info') {
+  const box = $('siteSettingsStatus');
+  if (!box) return;
+  box.className = 'notice' + (type === 'bad' ? ' bad' : type === 'good' ? ' good' : type === 'warn' ? ' warn' : '');
+  box.textContent = message;
+  box.classList.remove('hidden');
+}
 
 const migrateBtn = $('migrateImages');
 if (migrateBtn) {

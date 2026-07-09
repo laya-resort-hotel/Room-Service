@@ -18,5 +18,9 @@ service cloud.firestore {
     match /chatRooms/{roomId} {
       allow read, write: if true;
     }
+    // v3.5: ตั้งค่าเว็บ เช่น รูป Cover หน้าแรก
+    match /settings/{docId} {
+      allow read, write: if true;
+    }
   }
 }

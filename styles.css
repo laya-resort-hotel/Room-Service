@@ -142,3 +142,8 @@ button:disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.2)}
 .staff-bubble small{color:#2f6d4d}
 .system-bubble{margin:8px auto;background:#eef4ff;border:1px solid #c9dafc;color:#355c9a;border-radius:16px;max-width:92%;text-align:center}
 .system-bubble small{color:#5679b0}
+
+
+/* v3.5 Cover admin */
+.cover-admin-panel{align-items:flex-start}.cover-admin-form{width:min(520px,100%);display:grid;gap:8px}.cover-admin-actions{display:flex;gap:8px;flex-wrap:wrap}.cover-preview-wrap{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#f4f8f7}.cover-preview-wrap img{display:block;width:100%;height:190px;object-fit:cover}.cover-admin-form .field{margin-bottom:6px}
+@media(max-width:720px){.cover-admin-actions .admin-tool-button{width:100%}.cover-preview-wrap img{height:160px}}

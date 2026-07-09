@@ -144,3 +144,19 @@ match /chatRooms/{roomId} {
   - ปิดแจ้งเตือน
 
 หมายเหตุ: Browser บางตัวจะไม่ยอมให้เว็บเล่นเสียงจนกว่าพนักงานจะกดบนหน้าเว็บอย่างน้อย 1 ครั้ง เช่น กด Login หรือกดปุ่มเปิดเสียงแจ้งเตือน
+
+
+## v3.5 เปลี่ยนรูป Cover หน้าแรก
+
+เพิ่มหน้า Admin สำหรับแก้ไขรูป Cover ด้านบนของหน้าลูกค้าได้เอง
+
+วิธีใช้:
+1. เข้า `admin.html`
+2. ไปที่กล่อง **ตั้งค่ารูป Cover หน้าแรก**
+3. ใส่ URL รูปภาพ หรือเลือกรูปจากเครื่อง
+4. กด **บันทึกรูป Cover**
+5. หน้า QR ลูกค้าจะเปลี่ยนรูป Cover ตามแบบ Realtime
+
+ไฟล์ที่เกี่ยวข้อง: `admin.html`, `admin.js`, `customer.js`, `firebase-service.js`, `styles.css`, `firestore-rules.txt`, `storage-rules.txt`
+
+ต้องเปิด Firebase Storage และเพิ่ม Rules ให้ `site-images/{allPaths=**}` อ่าน/เขียนได้สำหรับช่วงทดสอบ

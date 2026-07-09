@@ -24,6 +24,15 @@ const LS_MENU = 'laya.rs.menu.v2';
 const LS_ORDERS = 'laya.rs.orders.v2';
 const LS_CHAT = 'laya.rs.chat.v2.';
 const LS_CLOSED_CHATS = 'laya.rs.closedChats.v1';
+const LS_SETTINGS = 'laya.rs.settings.v1';
+
+export const DEFAULT_SITE_SETTINGS = {
+  hotelName: 'LAYA Resort',
+  coverImage: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=1200&auto=format&fit=crop',
+  coverImageStoragePath: '',
+  coverAlt: 'LAYA Resort',
+  updatedAtText: ''
+};
 
 const sampleMenu = [
   { id:'demo-andaman-salad', active:true, category:'Room Service', nameTh:'🌶️🌶️ อันดามันซีฟู้ดสลัด', nameEn:'Andaman Seafood Salad', nameZh:'安达曼海鲜沙拉', nameRu:'Андаманский салат с морепродуктами', tags:'🌶️🌶️ Signature', description:'ซีฟู้ดสด น้ำสลัดรสจัด เสิร์ฟเย็นแบบเบา ๆ', descriptionTh:'ซีฟู้ดสด น้ำสลัดรสจัด เสิร์ฟเย็นแบบเบา ๆ', descriptionEn:'Fresh seafood salad with spicy dressing, served chilled.', descriptionZh:'新鲜海鲜沙拉，搭配香辣酱汁，冷食清爽。', descriptionRu:'Свежий салат с морепродуктами и пикантной заправкой, подается охлажденным.', price:470, image:'https://images.unsplash.com/photo-1553621042-f6e147245754?q=80&w=600&auto=format&fit=crop', sort:10 },
@@ -60,6 +69,58 @@ export function statusText(status, lang='TH') {
     RU:{new:'Новый заказ', preparing:'Готовится', delivering:'Доставка', done:'Завершено', cancelled:'Отменено'}
   };
   return (map[lang] || map.TH)[status] || status;
+}
+
+
+export function listenSiteSettings(callback, onError=null) {
+  if (isDemo) {
+    let last = '';
+    const emit = () => {
+      const settings = { ...DEFAULT_SITE_SETTINGS, ...readLS(LS_SETTINGS, {}) };
+      const str = JSON.stringify(settings);
+      if (str !== last) { last = str; callback(settings); }
+    };
+    emit();
+    const timer = setInterval(emit, 1000);
+    window.addEventListener('storage', emit);
+    window.addEventListener('laya-local-change', emit);
+    return () => { clearInterval(timer); window.removeEventListener('storage', emit); window.removeEventListener('laya-local-change', emit); };
+  }
+  return onSnapshot(doc(db, 'settings', 'site'), snap => {
+    callback({ ...DEFAULT_SITE_SETTINGS, ...(snap.exists() ? snap.data() : {}) });
+  }, err => { if (onError) onError(err); else console.error('listenSiteSettings error', err); });
+}
+
+export async function saveSiteSettings(settings) {
+  const payload = {
+    hotelName: String(settings.hotelName || DEFAULT_SITE_SETTINGS.hotelName).trim() || DEFAULT_SITE_SETTINGS.hotelName,
+    coverImage: String(settings.coverImage || DEFAULT_SITE_SETTINGS.coverImage).trim(),
+    coverImageStoragePath: String(settings.coverImageStoragePath || '').trim(),
+    coverAlt: String(settings.coverAlt || settings.hotelName || DEFAULT_SITE_SETTINGS.coverAlt).trim(),
+    updatedAtText: new Date().toISOString()
+  };
+  if (isDemo) { writeLS(LS_SETTINGS, payload); return payload; }
+  await setDoc(doc(db, 'settings', 'site'), { ...payload, updatedAt:serverTimestamp() }, { merge:true });
+  return payload;
+}
+
+export async function uploadSiteImage(fileOrBlob, filename='site-cover.jpg') {
+  if (!fileOrBlob) throw new Error('no-image-file');
+  const safeName = String(filename || 'site-cover.jpg')
+    .replace(/[^a-zA-Z0-9._-]/g, '-')
+    .replace(/-+/g, '-')
+    .slice(0, 80) || 'site-cover.jpg';
+  const ext = (safeName.split('.').pop() || 'jpg').toLowerCase();
+  const path = `site-images/cover/${Date.now()}_${Math.random().toString(16).slice(2,8)}.${ext === 'png' ? 'png' : 'jpg'}`;
+  if (isDemo) return { url: await blobToDataUrl(fileOrBlob), path: '' };
+  const metadata = {
+    contentType: fileOrBlob.type || (ext === 'png' ? 'image/png' : 'image/jpeg'),
+    cacheControl: 'public,max-age=31536000'
+  };
+  const ref = storageRef(storage, path);
+  await uploadBytes(ref, fileOrBlob, metadata);
+  const url = await getDownloadURL(ref);
+  return { url, path };
 }
 
 export function listenMenu(callback, includeInactive=false, onError=null) {

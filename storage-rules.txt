@@ -8,5 +8,9 @@ service firebase.storage {
       allow read: if true;
       allow write: if true;
     }
+    match /site-images/{allPaths=**} {
+      allow read: if true;
+      allow write: if true;
+    }
   }
 }

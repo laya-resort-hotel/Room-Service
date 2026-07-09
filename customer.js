@@ -1,5 +1,5 @@
 import { HOTEL_NAME } from './firebase-config.js';
-import { isDemo, listenMenu, createOrder, listenOrders, listenChat, sendChat, thb, fmtDate, statusText } from './firebase-service.js';
+import { isDemo, listenSiteSettings, listenMenu, createOrder, listenOrders, listenChat, sendChat, thb, fmtDate, statusText } from './firebase-service.js';
 
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
@@ -8,7 +8,9 @@ let menu = [];
 let cart = new Map();
 let activeCategory = 'All';
 let orders = [];
+let siteSettings = {};
 let unsubs = [];
+let settingsUnsub = null;
 
 const LANGS = ['TH', 'EN', 'ZH', 'RU'];
 let lang = LANGS.includes(localStorage.getItem('layaLang')) ? localStorage.getItem('layaLang') : 'TH';
@@ -57,7 +59,7 @@ const serviceBase = [
   { id:'voucher', icon:'🎟️', labelKey:'serviceVoucher', disabled:true, message:{TH:'ขอสอบถาม Voucher / Promotion',EN:'Please send voucher / promotion information.',ZH:'请提供优惠券/促销信息。',RU:'Пожалуйста, пришлите информацию о ваучерах/акциях.'} }
 ];
 
-$('hotelName').textContent = HOTEL_NAME;
+applySiteSettings({ hotelName: HOTEL_NAME });
 if (isDemo) {
   $('modePill').classList.remove('hidden');
   $('modePill').classList.add('demo');
@@ -69,6 +71,16 @@ function itemName(item) { return item[`name${lang}`] || item.nameTh || item.name
 function itemDesc(item) { return item[`description${lang}`] || item.description || item.descriptionTh || item.descriptionEn || item.descriptionZh || item.descriptionRu || item.nameEn || item.category || ''; }
 function categoryLabel(cat) { return cat === 'All' ? t('all') : cat; }
 function messageFor(obj) { return typeof obj === 'string' ? obj : (obj?.[lang] || obj?.TH || obj?.EN || ''); }
+
+function applySiteSettings(settings = {}) {
+  siteSettings = settings || {};
+  const hotel = siteSettings.hotelName || HOTEL_NAME || 'LAYA Resort';
+  if ($('hotelName')) $('hotelName').textContent = hotel;
+  if ($('coverImage') && siteSettings.coverImage) {
+    $('coverImage').src = siteSettings.coverImage;
+    $('coverImage').alt = siteSettings.coverAlt || hotel;
+  }
+}
 
 function applyTranslations() {
   document.documentElement.lang = lang === 'TH' ? 'th' : lang === 'ZH' ? 'zh-CN' : lang === 'RU' ? 'ru' : 'en';
@@ -137,6 +149,8 @@ function setupRoomRealtime() {
   unsubs.push(listenOrders((items) => { orders = items; renderOrders(items); }, room));
   unsubs.push(listenChat(room, renderChat));
 }
+
+settingsUnsub = listenSiteSettings(applySiteSettings, (err) => console.error('listenSiteSettings error', err));
 
 listenMenu((items) => {
   menu = items;
