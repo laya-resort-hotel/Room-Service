@@ -1,3 +1,18 @@
+# LAYA Room Service QR v3.6 - Cover อยู่ด้านบนสุด
+
+เวอร์ชันนี้ย้ายกล่อง **ตั้งค่ารูป Cover หน้าแรก** ไปไว้ด้านบนสุดของหน้า Admin ใต้หัวข้อหลักทันที เพื่อให้หาเจอง่ายกว่าเดิม
+
+ไฟล์ที่ควรอัปโหลดทับอย่างน้อย:
+- admin.html
+- styles.css
+- admin.js
+- customer.js
+- firebase-service.js
+- firestore-rules.txt
+- storage-rules.txt
+
+หลังอัปโหลด ให้เปิด admin.html แล้วกด Ctrl + F5 หรือเปิดแบบ Incognito เพื่อกัน cache.
+
 # LAYA Room Service QR v2.4 - Firebase Storage
 
 เวอร์ชันนี้เพิ่มระบบอัปโหลดรูปเมนูเข้า **Firebase Storage** แล้วเก็บเฉพาะ URL ของรูปไว้ใน Firestore

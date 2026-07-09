@@ -22,6 +22,7 @@
     <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
       <a class="secondary" href="./staff.html">Staff Board</a>
       <a class="secondary" href="./qr.html">QR</a>
+      <a class="secondary" href="#coverSettingsBox">Cover หน้าแรก</a>
       <span id="modePill" class="mode-pill hidden">Demo</span>
     </div>
   </header>
@@ -30,6 +31,23 @@
     <section class="hero">
       <h1>แก้ไขเมนูอาหารและราคา</h1>
       <p>รองรับชื่อเมนู/รายละเอียด 4 ภาษา: ไทย อังกฤษ จีน รัสเซีย ลูกค้าเปลี่ยนภาษาได้จากปุ่มมุมขวาบนของหน้า QR</p>
+      <div class="admin-tool-panel cover-admin-panel cover-admin-panel-top" id="coverSettingsBox">
+        <div>
+          <strong>🖼️ ตั้งค่ารูป Cover หน้าแรก</strong>
+          <small>อยู่ด้านบนสุดแล้ว: เปลี่ยนรูปใหญ่ด้านบนของหน้าลูกค้าได้จากตรงนี้ รูปจะอัปโหลดเข้า Firebase Storage และหน้า QR ลูกค้าจะเปลี่ยนแบบ Realtime</small>
+        </div>
+        <div class="cover-admin-form">
+          <div class="field"><label>ชื่อโรงแรมบนหน้าแรก</label><input id="siteHotelName" placeholder="LAYA Resort" /></div>
+          <div class="field"><label>Cover Image URL</label><input id="coverImageUrl" placeholder="https://... หรือเลือกรูปจากเครื่อง" /></div>
+          <div id="coverPreviewWrap" class="cover-preview-wrap hidden"><img id="coverPreview" alt="Cover preview" /></div>
+          <div class="field"><label>อัปโหลดรูป Cover ไป Firebase Storage</label><input id="coverImageUpload" type="file" accept="image/*" /></div>
+          <div class="cover-admin-actions">
+            <button class="primary admin-tool-button" type="button" id="saveSiteSettings">บันทึกรูป Cover</button>
+            <button class="secondary admin-tool-button" type="button" id="resetCoverDefault">ใช้รูป Cover เริ่มต้น</button>
+          </div>
+          <div id="siteSettingsStatus" class="notice hidden"></div>
+        </div>
+      </div>
       <div class="admin-tool-panel">
         <div>
           <strong>เครื่องมือแปลภาษาอัตโนมัติ</strong>
@@ -53,23 +71,7 @@
         <button class="primary admin-tool-button" type="button" id="migrateImages">ย้ายรูป Base64 ไป Storage</button>
       </div>
 
-      <div class="admin-tool-panel cover-admin-panel">
-        <div>
-          <strong>ตั้งค่ารูป Cover หน้าแรก</strong>
-          <small>เปลี่ยนรูปใหญ่ด้านบนของหน้าลูกค้าได้จากตรงนี้ รูปจะอัปโหลดเข้า Firebase Storage และหน้า QR ลูกค้าจะเปลี่ยนแบบ Realtime</small>
-        </div>
-        <div class="cover-admin-form">
-          <div class="field"><label>ชื่อโรงแรมบนหน้าแรก</label><input id="siteHotelName" placeholder="LAYA Resort" /></div>
-          <div class="field"><label>Cover Image URL</label><input id="coverImageUrl" placeholder="https://... หรือเลือกรูปจากเครื่อง" /></div>
-          <div id="coverPreviewWrap" class="cover-preview-wrap hidden"><img id="coverPreview" alt="Cover preview" /></div>
-          <div class="field"><label>อัปโหลดรูป Cover ไป Firebase Storage</label><input id="coverImageUpload" type="file" accept="image/*" /></div>
-          <div class="cover-admin-actions">
-            <button class="primary admin-tool-button" type="button" id="saveSiteSettings">บันทึกรูป Cover</button>
-            <button class="secondary admin-tool-button" type="button" id="resetCoverDefault">ใช้รูป Cover เริ่มต้น</button>
-          </div>
-          <div id="siteSettingsStatus" class="notice hidden"></div>
-        </div>
-      </div>
+
     </section>
 
     <section class="grid">
