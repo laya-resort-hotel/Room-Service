@@ -98,6 +98,41 @@ $('seedMenu').addEventListener('click', async () => {
   }
 });
 
+
+const translateFormMissingBtn = $('translateFormMissing');
+const translateFormOverwriteBtn = $('translateFormOverwrite');
+const translateAllMissingBtn = $('translateAllMissing');
+const autoTranslateToggle = $('autoTranslateToggle');
+let autoTranslateTimer = null;
+let autoTranslating = false;
+
+if (translateFormMissingBtn) {
+  translateFormMissingBtn.addEventListener('click', () => translateCurrentForm(false, { silent:false }));
+}
+if (translateFormOverwriteBtn) {
+  translateFormOverwriteBtn.addEventListener('click', () => {
+    if (!confirm('แปลใหม่ทับช่องภาษาอังกฤษ จีน และรัสเซียในฟอร์มนี้ใช่ไหม?')) return;
+    translateCurrentForm(true, { silent:false });
+  });
+}
+if (translateAllMissingBtn) {
+  translateAllMissingBtn.addEventListener('click', () => translateAllExistingMenu());
+}
+['nameTh', 'descriptionTh'].forEach(id => {
+  const el = $(id);
+  if (!el) return;
+  el.addEventListener('input', () => scheduleAutoTranslate());
+  el.addEventListener('blur', () => {
+    if (autoTranslateToggle?.checked) translateCurrentForm(false, { silent:true });
+  });
+});
+
+function scheduleAutoTranslate() {
+  if (!autoTranslateToggle?.checked) return;
+  clearTimeout(autoTranslateTimer);
+  autoTranslateTimer = setTimeout(() => translateCurrentForm(false, { silent:true }), 1200);
+}
+
 $('image').addEventListener('input', () => {
   clearPendingUpload(false);
   currentImageStoragePath = '';
@@ -263,6 +298,176 @@ function dataUrlToBlob(dataUrl) {
 
 function isBase64Image(value) { return String(value || '').startsWith('data:image/'); }
 function escapeHtml(value) { return String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+
+
+const TRANSLATION_TARGETS = [
+  { label:'อังกฤษ', api:'en', nameId:'nameEn', descId:'descriptionEn', nameKey:'nameEn', descKey:'descriptionEn' },
+  { label:'จีน', api:'zh-CN', nameId:'nameZh', descId:'descriptionZh', nameKey:'nameZh', descKey:'descriptionZh' },
+  { label:'รัสเซีย', api:'ru', nameId:'nameRu', descId:'descriptionRu', nameKey:'nameRu', descKey:'descriptionRu' }
+];
+const translateCache = new Map();
+
+async function translateCurrentForm(overwrite=false, options={}) {
+  if (autoTranslating) return;
+  const silent = Boolean(options.silent);
+  const sourceName = $('nameTh').value.trim();
+  const sourceDesc = $('descriptionTh').value.trim();
+  const tasks = [];
+
+  for (const target of TRANSLATION_TARGETS) {
+    if (sourceName && (overwrite || !$(target.nameId).value.trim())) tasks.push({ inputId:target.nameId, source:sourceName, target, field:'ชื่อเมนู' });
+    if (sourceDesc && (overwrite || !$(target.descId).value.trim())) tasks.push({ inputId:target.descId, source:sourceDesc, target, field:'รายละเอียด' });
+  }
+
+  if (!tasks.length) {
+    if (!silent) {
+      setTranslateStatus('ไม่มีช่องว่างให้แปล ถ้าต้องการแปลใหม่ให้กด “แปลใหม่ทับภาษาอื่น”', 'info');
+      alert('ไม่มีช่องว่างให้แปล');
+    }
+    return;
+  }
+
+  autoTranslating = true;
+  setTranslateButtonsDisabled(true);
+  try {
+    for (let i = 0; i < tasks.length; i++) {
+      const task = tasks[i];
+      setTranslateStatus(`กำลังแปล${task.field}เป็นภาษา${task.target.label} (${i + 1}/${tasks.length})...`, 'info');
+      $(task.inputId).value = await translateText(task.source, task.target.api);
+      await sleep(150);
+    }
+    setTranslateStatus('แปลภาษาในฟอร์มเสร็จแล้ว กรุณาตรวจคำแปลก่อนบันทึก', 'good');
+    if (!silent) alert('แปลภาษาในฟอร์มเสร็จแล้ว กรุณาตรวจคำแปลก่อนบันทึก');
+  } catch (err) {
+    console.error(err);
+    setTranslateStatus('แปลภาษาไม่ได้: ' + (err?.message || err), 'bad');
+    if (!silent) alert('แปลภาษาไม่ได้: ' + (err?.message || err));
+  } finally {
+    autoTranslating = false;
+    setTranslateButtonsDisabled(false);
+  }
+}
+
+async function translateAllExistingMenu() {
+  if (!menu.length) { alert('ยังไม่มีเมนูให้แปล'); return; }
+  const targets = menu.filter(item => menuNeedsTranslation(item));
+  if (!targets.length) { alert('เมนูทั้งหมดมีคำแปลครบแล้ว หรือไม่มีชื่อภาษาไทยให้ใช้แปล'); return; }
+  if (!confirm(`พบเมนูที่ยังแปลไม่ครบ ${targets.length} รายการ ต้องการแปลช่องที่ว่างทั้งหมดตอนนี้ไหม?\n\nระบบจะไม่ทับช่องที่คุณกรอกไว้แล้ว`)) return;
+
+  translateAllMissingBtn.disabled = true;
+  setTranslateButtonsDisabled(true);
+  let updated = 0;
+  try {
+    for (let i = 0; i < targets.length; i++) {
+      const item = targets[i];
+      const title = item.nameTh || item.nameEn || item.id;
+      setTranslateStatus(`กำลังแปลเมนูเดิม ${i + 1}/${targets.length}: ${title}`, 'info');
+      const patch = await buildTranslatedMenuPatch(item, false);
+      if (patch.changed) {
+        await saveMenuItem(patch.item);
+        updated++;
+        await sleep(350);
+      }
+    }
+    setTranslateStatus(`แปลเมนูเดิมเสร็จแล้ว อัปเดต ${updated} รายการ`, 'good');
+    alert(`แปลเมนูเดิมเสร็จแล้ว อัปเดต ${updated} รายการ\nกรุณารีเฟรชหน้าและตรวจคำแปลอีกครั้ง`);
+  } catch (err) {
+    console.error(err);
+    setTranslateStatus('แปลเมนูเดิมไม่ได้: ' + (err?.message || friendlyFirebaseError(err)), 'bad');
+    alert('แปลเมนูเดิมไม่ได้: ' + (err?.message || friendlyFirebaseError(err)));
+  } finally {
+    translateAllMissingBtn.disabled = false;
+    setTranslateButtonsDisabled(false);
+  }
+}
+
+function menuNeedsTranslation(item) {
+  const sourceName = String(item.nameTh || '').trim();
+  const sourceDesc = String(item.descriptionTh || item.description || '').trim();
+  if (!sourceName && !sourceDesc) return false;
+  for (const target of TRANSLATION_TARGETS) {
+    if (sourceName && !String(item[target.nameKey] || '').trim()) return true;
+    if (sourceDesc && !String(item[target.descKey] || '').trim()) return true;
+  }
+  return false;
+}
+
+async function buildTranslatedMenuPatch(item, overwrite=false) {
+  const next = { ...item };
+  let changed = false;
+  const sourceName = String(item.nameTh || '').trim();
+  const sourceDesc = String(item.descriptionTh || item.description || '').trim();
+
+  for (const target of TRANSLATION_TARGETS) {
+    if (sourceName && (overwrite || !String(next[target.nameKey] || '').trim())) {
+      next[target.nameKey] = await translateText(sourceName, target.api);
+      changed = true;
+      await sleep(120);
+    }
+    if (sourceDesc && (overwrite || !String(next[target.descKey] || '').trim())) {
+      next[target.descKey] = await translateText(sourceDesc, target.api);
+      changed = true;
+      await sleep(120);
+    }
+  }
+  return { item:next, changed };
+}
+
+async function translateText(text, targetLang) {
+  const sourceText = String(text || '').trim();
+  if (!sourceText) return '';
+  const cacheKey = `th|${targetLang}|${sourceText}`;
+  if (translateCache.has(cacheKey)) return translateCache.get(cacheKey);
+
+  let translated = '';
+  try {
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(sourceText)}&langpair=th|${encodeURIComponent(targetLang)}`;
+    const res = await fetch(url);
+    if (res.ok) {
+      const data = await res.json();
+      translated = decodeHtml(data?.responseData?.translatedText || '').trim();
+    }
+  } catch (err) {
+    console.warn('MyMemory translate failed, trying fallback', err);
+  }
+
+  if (!translated || translated.toLowerCase() === sourceText.toLowerCase() || translated.includes('NO QUERY SPECIFIED')) {
+    try {
+      const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=th&tl=${encodeURIComponent(targetLang)}&dt=t&q=${encodeURIComponent(sourceText)}`;
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        translated = (data?.[0] || []).map(part => part?.[0] || '').join('').trim();
+      }
+    } catch (err) {
+      console.warn('Fallback translate failed', err);
+    }
+  }
+
+  if (!translated) throw new Error('เชื่อมต่อบริการแปลภาษาไม่ได้ กรุณาตรวจอินเทอร์เน็ต หรือลองใหม่อีกครั้ง');
+  translateCache.set(cacheKey, translated);
+  return translated;
+}
+
+function decodeHtml(value) {
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = String(value || '');
+  return textarea.value;
+}
+
+function setTranslateButtonsDisabled(disabled) {
+  [translateFormMissingBtn, translateFormOverwriteBtn, translateAllMissingBtn].forEach(btn => { if (btn) btn.disabled = disabled; });
+}
+
+function setTranslateStatus(message, type='info') {
+  const box = $('translateStatus');
+  if (!box) return;
+  box.className = 'notice' + (type === 'bad' ? ' bad' : type === 'good' ? ' good' : '');
+  box.textContent = message;
+  box.classList.remove('hidden');
+}
+
+function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
 function setAdminStatus(message, type='info') {
   let box = document.getElementById('adminStatus');
