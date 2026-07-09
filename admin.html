@@ -33,13 +33,14 @@
       <div class="admin-tool-panel">
         <div>
           <strong>เครื่องมือแปลภาษาอัตโนมัติ</strong>
-          <small>พิมพ์ชื่อเมนู/รายละเอียดภาษาไทย แล้วระบบจะช่วยแปลเป็นอังกฤษ จีน และรัสเซียให้ ช่องที่มีข้อมูลอยู่แล้วจะไม่ถูกทับ เว้นแต่กดปุ่มแปลใหม่ทับทั้งหมด</small>
+          <small>พิมพ์ชื่อเมนู/รายละเอียดภาษาไทย ระบบจะแปลเป็นอังกฤษ จีน และรัสเซียให้อัตโนมัติ ถ้าแก้ชื่อไทย ระบบจะอัปเดตภาษาอื่นให้ใหม่ด้วย หากไม่ต้องการให้ทับ ให้ปิดสวิตช์แปลอัตโนมัติ</small>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end">
           <label class="switch-row" style="margin:0"><input id="autoTranslateToggle" type="checkbox" checked /> แปลอัตโนมัติเมื่อพิมพ์ไทย</label>
           <button class="secondary admin-tool-button" type="button" id="translateFormMissing">แปลช่องที่ว่างในฟอร์มนี้</button>
           <button class="secondary admin-tool-button" type="button" id="translateFormOverwrite">แปลใหม่ทับภาษาอื่น</button>
-          <button class="primary admin-tool-button" type="button" id="translateAllMissing">แปลเมนูเดิมทั้งหมด</button>
+          <button class="primary admin-tool-button" type="button" id="translateAllMissing">แปลเมนูเดิมที่ยังว่าง</button>
+          <button class="secondary admin-tool-button warn-button" type="button" id="translateAllOverwrite">แปลใหม่ทับเมนูเดิมทั้งหมด</button>
         </div>
       </div>
       <div id="translateStatus" class="notice hidden" style="margin-top:10px"></div>
@@ -60,7 +61,7 @@
         <input type="hidden" id="itemId" />
         <div class="field"><label>หมวดหมู่ / Category</label><input id="category" placeholder="เช่น Room Service / Western Food / Beverage" required /></div>
 
-        <div class="notice good" style="margin-bottom:12px"><b>ข้อมูล 4 ภาษา</b> พิมพ์ช่องภาษาไทยก่อน แล้วระบบจะแปลอังกฤษ/จีน/รัสเซียให้อัตโนมัติ ถ้ายังไม่ใส่ภาษาจีน/รัสเซีย ระบบจะแสดงชื่อไทยหรืออังกฤษแทนชั่วคราว</div>
+        <div class="notice good" style="margin-bottom:12px"><b>ข้อมูล 4 ภาษา</b> พิมพ์ช่องภาษาไทยก่อน ระบบจะแปลอังกฤษ/จีน/รัสเซียให้อัตโนมัติ ถ้าแก้ชื่อไทย ภาษาอื่นจะถูกอัปเดตตามใหม่</div>
         <div class="lang-field-grid">
           <div class="field"><label>ชื่อเมนูภาษาไทย</label><input id="nameTh" placeholder="ผัดไทยกุ้ง" required /></div>
           <div class="field"><label>Menu name English</label><input id="nameEn" placeholder="Pad Thai Goong" /></div>

@@ -102,6 +102,7 @@ $('seedMenu').addEventListener('click', async () => {
 const translateFormMissingBtn = $('translateFormMissing');
 const translateFormOverwriteBtn = $('translateFormOverwrite');
 const translateAllMissingBtn = $('translateAllMissing');
+const translateAllOverwriteBtn = $('translateAllOverwrite');
 const autoTranslateToggle = $('autoTranslateToggle');
 let autoTranslateTimer = null;
 let autoTranslating = false;
@@ -116,21 +117,24 @@ if (translateFormOverwriteBtn) {
   });
 }
 if (translateAllMissingBtn) {
-  translateAllMissingBtn.addEventListener('click', () => translateAllExistingMenu());
+  translateAllMissingBtn.addEventListener('click', () => translateAllExistingMenu(false));
+}
+if (translateAllOverwriteBtn) {
+  translateAllOverwriteBtn.addEventListener('click', () => translateAllExistingMenu(true));
 }
 ['nameTh', 'descriptionTh'].forEach(id => {
   const el = $(id);
   if (!el) return;
   el.addEventListener('input', () => scheduleAutoTranslate());
   el.addEventListener('blur', () => {
-    if (autoTranslateToggle?.checked) translateCurrentForm(false, { silent:true });
+    if (autoTranslateToggle?.checked) translateCurrentForm(true, { silent:true, auto:true });
   });
 });
 
 function scheduleAutoTranslate() {
   if (!autoTranslateToggle?.checked) return;
   clearTimeout(autoTranslateTimer);
-  autoTranslateTimer = setTimeout(() => translateCurrentForm(false, { silent:true }), 1200);
+  autoTranslateTimer = setTimeout(() => translateCurrentForm(true, { silent:true, auto:true }), 900);
 }
 
 $('image').addEventListener('input', () => {
@@ -348,21 +352,27 @@ async function translateCurrentForm(overwrite=false, options={}) {
   }
 }
 
-async function translateAllExistingMenu() {
+async function translateAllExistingMenu(overwrite=false) {
   if (!menu.length) { alert('ยังไม่มีเมนูให้แปล'); return; }
-  const targets = menu.filter(item => menuNeedsTranslation(item));
-  if (!targets.length) { alert('เมนูทั้งหมดมีคำแปลครบแล้ว หรือไม่มีชื่อภาษาไทยให้ใช้แปล'); return; }
-  if (!confirm(`พบเมนูที่ยังแปลไม่ครบ ${targets.length} รายการ ต้องการแปลช่องที่ว่างทั้งหมดตอนนี้ไหม?\n\nระบบจะไม่ทับช่องที่คุณกรอกไว้แล้ว`)) return;
+  const targets = overwrite
+    ? menu.filter(item => String(item.nameTh || item.descriptionTh || item.description || '').trim())
+    : menu.filter(item => menuNeedsTranslation(item));
+  if (!targets.length) { alert(overwrite ? 'ไม่พบเมนูที่มีภาษาไทยสำหรับแปล' : 'เมนูทั้งหมดมีคำแปลครบแล้ว หรือไม่มีชื่อภาษาไทยให้ใช้แปล'); return; }
+  const message = overwrite
+    ? `พบเมนูที่มีภาษาไทย ${targets.length} รายการ ต้องการแปลใหม่ทับภาษาอังกฤษ/จีน/รัสเซียทั้งหมดไหม?\n\nเหมาะสำหรับแก้เมนูที่เคยแปลผิด หรือชื่อไทยเปลี่ยนแล้วภาษาอื่นยังเป็นชื่อเก่า`
+    : `พบเมนูที่ยังแปลไม่ครบ ${targets.length} รายการ ต้องการแปลช่องที่ว่างทั้งหมดตอนนี้ไหม?\n\nระบบจะไม่ทับช่องที่คุณกรอกไว้แล้ว`;
+  if (!confirm(message)) return;
 
-  translateAllMissingBtn.disabled = true;
+  if (translateAllMissingBtn) translateAllMissingBtn.disabled = true;
+  if (translateAllOverwriteBtn) translateAllOverwriteBtn.disabled = true;
   setTranslateButtonsDisabled(true);
   let updated = 0;
   try {
     for (let i = 0; i < targets.length; i++) {
       const item = targets[i];
       const title = item.nameTh || item.nameEn || item.id;
-      setTranslateStatus(`กำลังแปลเมนูเดิม ${i + 1}/${targets.length}: ${title}`, 'info');
-      const patch = await buildTranslatedMenuPatch(item, false);
+      setTranslateStatus(`${overwrite ? 'กำลังแปลใหม่ทับเมนูเดิม' : 'กำลังแปลเมนูเดิม'} ${i + 1}/${targets.length}: ${title}`, 'info');
+      const patch = await buildTranslatedMenuPatch(item, overwrite);
       if (patch.changed) {
         await saveMenuItem(patch.item);
         updated++;
@@ -376,7 +386,8 @@ async function translateAllExistingMenu() {
     setTranslateStatus('แปลเมนูเดิมไม่ได้: ' + (err?.message || friendlyFirebaseError(err)), 'bad');
     alert('แปลเมนูเดิมไม่ได้: ' + (err?.message || friendlyFirebaseError(err)));
   } finally {
-    translateAllMissingBtn.disabled = false;
+    if (translateAllMissingBtn) translateAllMissingBtn.disabled = false;
+    if (translateAllOverwriteBtn) translateAllOverwriteBtn.disabled = false;
     setTranslateButtonsDisabled(false);
   }
 }
@@ -456,7 +467,7 @@ function decodeHtml(value) {
 }
 
 function setTranslateButtonsDisabled(disabled) {
-  [translateFormMissingBtn, translateFormOverwriteBtn, translateAllMissingBtn].forEach(btn => { if (btn) btn.disabled = disabled; });
+  [translateFormMissingBtn, translateFormOverwriteBtn, translateAllMissingBtn, translateAllOverwriteBtn].forEach(btn => { if (btn) btn.disabled = disabled; });
 }
 
 function setTranslateStatus(message, type='info') {
