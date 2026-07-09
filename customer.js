@@ -370,9 +370,11 @@ function renderChat(messages) {
     $('chatMessages').innerHTML = `<div class="empty-state">${escapeHtml(t('needRoomChat'))}</div>`;
     return;
   }
-  $('chatMessages').innerHTML = messages.length ? messages.map(m => `
-    <div class="msg ${m.sender === 'guest' ? 'me' : ''}">${escapeHtml(m.text)}<small>${m.sender === 'guest' ? t('you') : m.sender === 'staff' ? t('staff') : t('system')} • ${fmtDate(m.createdAtText)}</small></div>
-  `).join('') : `<div class="empty-state">${escapeHtml(t('chatEmpty'))}</div>`;
+  $('chatMessages').innerHTML = messages.length ? messages.map(m => {
+    const cls = m.sender === 'guest' ? 'msg guest-bubble' : m.sender === 'staff' ? 'msg staff-bubble' : 'msg system-bubble';
+    return `
+    <div class="${cls}">${escapeHtml(m.text)}<small>${m.sender === 'guest' ? t('you') : m.sender === 'staff' ? t('staff') : t('system')} • ${fmtDate(m.createdAtText)}</small></div>`;
+  }).join('') : `<div class="empty-state">${escapeHtml(t('chatEmpty'))}</div>`;
   $('chatMessages').scrollTop = $('chatMessages').scrollHeight;
 }
 

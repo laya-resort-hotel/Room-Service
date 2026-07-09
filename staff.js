@@ -331,7 +331,10 @@ function renderChat(messages) {
     markChatSeen(activeRoom).catch(() => {});
     if (pendingAlertRoom === activeRoom) hideStaffAlert();
   }
-  $('chatMessages').innerHTML = messages.length ? messages.map(m => `<div class="msg ${m.sender === 'staff' ? 'me' : ''}">${escapeHtml(m.text)}<small>${m.sender === 'staff' ? 'พนักงาน' : m.sender === 'guest' ? 'ลูกค้า' : 'ระบบ'} • ${fmtDate(m.createdAtText)}</small></div>`).join('') : '<div class="empty">ยังไม่มีข้อความ</div>';
+  $('chatMessages').innerHTML = messages.length ? messages.map(m => {
+    const cls = m.sender === 'staff' ? 'msg staff-bubble' : m.sender === 'guest' ? 'msg guest-bubble' : 'msg system-bubble';
+    return `<div class="${cls}">${escapeHtml(m.text)}<small>${m.sender === 'staff' ? 'พนักงาน' : m.sender === 'guest' ? 'ลูกค้า' : 'ระบบ'} • ${fmtDate(m.createdAtText)}</small></div>`;
+  }).join('') : '<div class="empty">ยังไม่มีข้อความ</div>';
   $('chatMessages').scrollTop = $('chatMessages').scrollHeight;
 }
 $('sendChat').addEventListener('click', sendStaffChat);
