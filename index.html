@@ -9,13 +9,13 @@
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body class="guest-body">
-  <div class="phone-app">
+  <div class="phone-app" id="phoneApp">
     <section class="guest-cover" aria-label="Hotel cover">
       <img id="coverImage" src="https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=1200&auto=format&fit=crop" alt="LAYA Resort" />
       <div class="cover-shade"></div>
       <div class="cover-tabs" aria-label="Cover tabs">
-        <button class="cover-tab active">Cover</button>
-        <button class="cover-tab">Environment</button>
+        <button class="cover-tab active" id="coverTabText">Cover</button>
+        <button class="cover-tab" id="environmentTabText">Environment</button>
         <button class="cover-next" aria-label="Next">▶</button>
       </div>
     </section>
@@ -33,7 +33,7 @@
       </div>
 
       <div id="roomMissing" class="notice warn hidden guest-room-box">
-        ไม่พบเลขห้องจาก QR Code กรุณาใส่เลขห้องเพื่อทดสอบระบบ
+        <span id="roomMissingText">ไม่พบเลขห้องจาก QR Code กรุณาใส่เลขห้องเพื่อทดสอบระบบ</span>
         <div class="guest-room-input">
           <input id="manualRoom" placeholder="เช่น A101" />
           <button class="primary" id="saveManualRoom">เริ่ม</button>
@@ -45,8 +45,8 @@
 
         <section class="menu-area" id="roomServiceArea">
           <div class="section-title-row">
-            <h2>LAYA Room Service</h2>
-            <button class="view-all" id="viewAllMenu">ดูทั้งหมด <span>▶</span></button>
+            <h2 id="roomServiceTitle">LAYA Room Service</h2>
+            <button class="view-all" id="viewAllMenu"><span id="viewAllMenuText">ดูทั้งหมด</span> <span>▶</span></button>
           </div>
           <div class="category-strip" id="categoryStrip"></div>
           <div id="menuSections" class="menu-sections"></div>
@@ -54,32 +54,28 @@
 
         <section class="promo-list">
           <div class="section-title-row">
-            <h2>Spa & บริการ</h2>
-            <button class="view-all" data-service-prefill="ขอข้อมูล Spa Promotion">ดูทั้งหมด <span>▶</span></button>
+            <h2 id="spaTitle">Spa & บริการ</h2>
+            <button class="view-all" id="viewAllSpa" data-service-prefill="ขอข้อมูล Spa Promotion"><span id="viewAllSpaText">ดูทั้งหมด</span> <span>▶</span></button>
           </div>
-          <article class="promo-row" data-service-prefill="สนใจโปรโมชันสปา กรุณาส่งรายละเอียดให้หน่อย">
+          <article class="promo-row" id="spaPromoRow" data-service-prefill="สนใจโปรโมชันสปา กรุณาส่งรายละเอียดให้หน่อย">
             <img src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=600&auto=format&fit=crop" alt="Spa" />
-            <div><h3>Relaxing Spa Package</h3><p>SPA & WELLNESS</p></div>
+            <div><h3 id="spaPromoTitle">Relaxing Spa Package</h3><p>SPA & WELLNESS</p></div>
           </article>
-          <article class="promo-row" data-service-prefill="ขอจองรถรับส่ง กรุณาติดต่อกลับที่ห้องนี้">
+          <article class="promo-row" id="transportPromoRow" data-service-prefill="ขอจองรถรับส่ง กรุณาติดต่อกลับที่ห้องนี้">
             <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=600&auto=format&fit=crop" alt="Transport" />
-            <div><h3>Airport Transfer / Shuttle</h3><p>TRANSPORTATION</p></div>
+            <div><h3 id="transportPromoTitle">Airport Transfer / Shuttle</h3><p>TRANSPORTATION</p></div>
           </article>
         </section>
       </section>
 
       <section id="chatPage" class="app-page" aria-label="Chat">
         <div class="page-heading">
-          <h2>แชทกับพนักงาน</h2>
-          <p>สอบถามเมนู แจ้งแพ้อาหาร ขอแม่บ้าน หรือบริการอื่น ๆ ได้ที่นี่</p>
+          <h2 id="chatPageTitle">แชทกับพนักงาน</h2>
+          <p id="chatPageDesc">สอบถามเมนู แจ้งแพ้อาหาร ขอแม่บ้าน หรือบริการอื่น ๆ ได้ที่นี่</p>
         </div>
         <div class="chat-card guest-chat-card">
           <div id="chatMessages" class="chat-messages"></div>
-          <div class="quick-chat">
-            <button data-quick="ขอเมนูแนะนำสำหรับวันนี้">เมนูแนะนำ</button>
-            <button data-quick="ขอช้อนส้อมเพิ่ม">ช้อนส้อมเพิ่ม</button>
-            <button data-quick="มีอาหารสำหรับเด็กไหม">อาหารเด็ก</button>
-          </div>
+          <div class="quick-chat" id="quickChat"></div>
           <div class="chat-send">
             <input id="chatInput" placeholder="พิมพ์ข้อความถึงพนักงาน..." />
             <button class="primary" id="sendChat">ส่ง</button>
@@ -89,23 +85,23 @@
 
       <section id="ordersPage" class="app-page" aria-label="Orders">
         <div class="page-heading">
-          <h2>คำสั่งของฉัน</h2>
-          <p>ติดตามสถานะออเดอร์ล่าสุดของห้องนี้</p>
+          <h2 id="ordersPageTitle">คำสั่งของฉัน</h2>
+          <p id="ordersPageDesc">ติดตามสถานะออเดอร์ล่าสุดของห้องนี้</p>
         </div>
         <div id="ordersList" class="guest-orders-list"></div>
       </section>
     </main>
 
     <button id="cartBar" class="cart-bar hidden" aria-label="Open cart">
-      <span><strong id="cartCount">0</strong> รายการ</span>
+      <span><strong id="cartCount">0</strong> <span id="cartBarItemsText">รายการ</span></span>
       <span id="cartTotalBar">฿0</span>
-      <span>ดูตะกร้า</span>
+      <span id="cartBarOpenText">ดูตะกร้า</span>
     </button>
 
     <nav class="bottom-nav" aria-label="Guest navigation">
-      <button class="nav-item active" data-page="homePage"><span>⌂</span><small>หน้าแรก</small></button>
-      <button class="nav-item" data-page="chatPage"><span>☏</span><small>แชท</small></button>
-      <button class="nav-item" data-page="ordersPage"><span>●</span><small>คำสั่งของฉัน</small></button>
+      <button class="nav-item active" data-page="homePage"><span>⌂</span><small id="navHomeText">หน้าแรก</small></button>
+      <button class="nav-item" data-page="chatPage"><span>☏</span><small id="navChatText">แชท</small></button>
+      <button class="nav-item" data-page="ordersPage"><span>●</span><small id="navOrdersText">คำสั่งของฉัน</small></button>
     </nav>
   </div>
 
@@ -114,13 +110,13 @@
     <section class="drawer-panel" role="dialog" aria-modal="true" aria-label="Cart">
       <div class="drawer-handle"></div>
       <div class="drawer-head">
-        <h2>ตะกร้าอาหาร</h2>
+        <h2 id="cartTitle">ตะกร้าอาหาร</h2>
         <button id="closeCart" class="icon-btn">✕</button>
       </div>
       <div id="cartItems" class="cart-items"></div>
-      <div class="field"><label>ชื่อผู้สั่ง / Guest name</label><input id="guestName" placeholder="ไม่บังคับ" /></div>
-      <div class="field"><label>หมายเหตุ</label><textarea id="orderNote" placeholder="เช่น ไม่เผ็ด / ขอช้อนเพิ่ม / แพ้อาหาร..."></textarea></div>
-      <div class="drawer-total"><span>รวมทั้งหมด</span><strong id="cartTotal">฿0</strong></div>
+      <div class="field"><label id="guestNameLabel">ชื่อผู้สั่ง / Guest name</label><input id="guestName" placeholder="ไม่บังคับ" /></div>
+      <div class="field"><label id="orderNoteLabel">หมายเหตุ</label><textarea id="orderNote" placeholder="เช่น ไม่เผ็ด / ขอช้อนเพิ่ม / แพ้อาหาร..."></textarea></div>
+      <div class="drawer-total"><span id="cartTotalText">รวมทั้งหมด</span><strong id="cartTotal">฿0</strong></div>
       <button class="primary place-order-btn" id="placeOrder">ส่งออเดอร์</button>
       <div id="orderResult" style="margin-top:12px"></div>
     </section>

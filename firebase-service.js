@@ -20,16 +20,16 @@ const LS_ORDERS = 'laya.rs.orders.v2';
 const LS_CHAT = 'laya.rs.chat.v2.';
 
 const sampleMenu = [
-  { id:'demo-andaman-salad', active:true, category:'Room Service', nameTh:'🌶️🌶️ อันดามันซีฟู้ดสลัด', nameEn:'Andaman Seafood Salad', tags:'🌶️🌶️ Signature', description:'ซีฟู้ดสด น้ำสลัดรสจัด เสิร์ฟเย็นแบบเบา ๆ', price:470, image:'https://images.unsplash.com/photo-1553621042-f6e147245754?q=80&w=600&auto=format&fit=crop', sort:10 },
-  { id:'demo-grilled-prawn', active:true, category:'Room Service', nameTh:'🦐 กุ้งแม่น้ำย่าง', nameEn:'Grilled River Prawn', tags:'🦐 Recommended', description:'กุ้งย่าง เสิร์ฟพร้อมซอสซีฟู้ด', price:660, image:'https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?q=80&w=600&auto=format&fit=crop', sort:20 },
-  { id:'demo-padthai', active:true, category:'Room Service', nameTh:'ผัดไทยกุ้ง', nameEn:'Pad Thai Goong', tags:'Thai Classic', description:'กุ้งสด เส้นจันท์ ซอสผัดไทย', price:240, image:'https://images.unsplash.com/photo-1559314809-0d155014e29e?q=80&w=600&auto=format&fit=crop', sort:30 },
-  { id:'demo-tomyum', active:true, category:'Room Service', nameTh:'ต้มยำกุ้ง', nameEn:'Tom Yum Goong', tags:'Spicy Soup', description:'ซุปต้มยำรสจัด หอมสมุนไพรไทย', price:280, image:'https://images.unsplash.com/photo-1548943487-a2e4e43b4853?q=80&w=600&auto=format&fit=crop', sort:40 },
-  { id:'demo-club', active:true, category:'Western Food', nameTh:'คลับแซนด์วิช', nameEn:'Club Sandwich', tags:'Western', description:'ไก่ ไข่ เบคอน เสิร์ฟพร้อมเฟรนช์ฟรายส์', price:260, image:'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?q=80&w=600&auto=format&fit=crop', sort:50 },
-  { id:'demo-carbonara', active:true, category:'Western Food', nameTh:'สปาเก็ตตี้คาโบนาร่า', nameEn:'Spaghetti Carbonara', tags:'Pasta', description:'ครีมซอส เบคอน ชีสพาร์เมซาน', price:290, image:'https://images.unsplash.com/photo-1612874742237-6526221588e3?q=80&w=600&auto=format&fit=crop', sort:60 },
-  { id:'demo-burger', active:true, category:'Western Food', nameTh:'ชีสเบอร์เกอร์', nameEn:'Cheese Burger', tags:'Burger', description:'เบอร์เกอร์เนื้อ/ไก่ เสิร์ฟพร้อมเฟรนช์ฟรายส์', price:320, image:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=600&auto=format&fit=crop', sort:70 },
-  { id:'demo-coke', active:true, category:'Beverage', nameTh:'โค้ก', nameEn:'Coca-Cola', tags:'Soft Drink', description:'กระป๋องเย็น', price:70, image:'https://images.unsplash.com/photo-1554866585-cd94860890b7?q=80&w=600&auto=format&fit=crop', sort:80 },
-  { id:'demo-water', active:true, category:'Beverage', nameTh:'น้ำแร่', nameEn:'Mineral Water', tags:'Water', description:'น้ำแร่ขวด', price:60, image:'https://images.unsplash.com/photo-1564419320461-6870880221ad?q=80&w=600&auto=format&fit=crop', sort:90 },
-  { id:'demo-coconut', active:true, category:'Beverage', nameTh:'มะพร้าวสด', nameEn:'Fresh Coconut', tags:'Fresh', description:'มะพร้าวเย็น สดชื่น', price:120, image:'https://images.unsplash.com/photo-1580984969071-a8da5656c2fb?q=80&w=600&auto=format&fit=crop', sort:100 }
+  { id:'demo-andaman-salad', active:true, category:'Room Service', nameTh:'🌶️🌶️ อันดามันซีฟู้ดสลัด', nameEn:'Andaman Seafood Salad', nameZh:'安达曼海鲜沙拉', nameRu:'Андаманский салат с морепродуктами', tags:'🌶️🌶️ Signature', description:'ซีฟู้ดสด น้ำสลัดรสจัด เสิร์ฟเย็นแบบเบา ๆ', descriptionTh:'ซีฟู้ดสด น้ำสลัดรสจัด เสิร์ฟเย็นแบบเบา ๆ', descriptionEn:'Fresh seafood salad with spicy dressing, served chilled.', descriptionZh:'新鲜海鲜沙拉，搭配香辣酱汁，冷食清爽。', descriptionRu:'Свежий салат с морепродуктами и пикантной заправкой, подается охлажденным.', price:470, image:'https://images.unsplash.com/photo-1553621042-f6e147245754?q=80&w=600&auto=format&fit=crop', sort:10 },
+  { id:'demo-grilled-prawn', active:true, category:'Room Service', nameTh:'🦐 กุ้งแม่น้ำย่าง', nameEn:'Grilled River Prawn', nameZh:'烤河虾', nameRu:'Жареная речная креветка', tags:'🦐 Recommended', description:'กุ้งย่าง เสิร์ฟพร้อมซอสซีฟู้ด', descriptionTh:'กุ้งย่าง เสิร์ฟพร้อมซอสซีฟู้ด', descriptionEn:'Grilled prawn served with Thai seafood sauce.', descriptionZh:'烤大虾，配泰式海鲜酱。', descriptionRu:'Жареная креветка с тайским соусом из морепродуктов.', price:660, image:'https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?q=80&w=600&auto=format&fit=crop', sort:20 },
+  { id:'demo-padthai', active:true, category:'Room Service', nameTh:'ผัดไทยกุ้ง', nameEn:'Pad Thai Goong', nameZh:'泰式炒河粉配虾', nameRu:'Пад Тай с креветками', tags:'Thai Classic', description:'กุ้งสด เส้นจันท์ ซอสผัดไทย', descriptionTh:'กุ้งสด เส้นจันท์ ซอสผัดไทย', descriptionEn:'Thai rice noodles with fresh prawns and Pad Thai sauce.', descriptionZh:'泰式米粉配鲜虾和经典炒河粉酱。', descriptionRu:'Тайская рисовая лапша со свежими креветками и соусом Пад Тай.', price:240, image:'https://images.unsplash.com/photo-1559314809-0d155014e29e?q=80&w=600&auto=format&fit=crop', sort:30 },
+  { id:'demo-tomyum', active:true, category:'Room Service', nameTh:'ต้มยำกุ้ง', nameEn:'Tom Yum Goong', nameZh:'冬阴功虾汤', nameRu:'Том Ям с креветками', tags:'Spicy Soup', description:'ซุปต้มยำรสจัด หอมสมุนไพรไทย', descriptionTh:'ซุปต้มยำรสจัด หอมสมุนไพรไทย', descriptionEn:'Spicy Thai soup with prawns and aromatic herbs.', descriptionZh:'香辣泰式虾汤，带有泰国香草风味。', descriptionRu:'Острый тайский суп с креветками и ароматными травами.', price:280, image:'https://images.unsplash.com/photo-1548943487-a2e4e43b4853?q=80&w=600&auto=format&fit=crop', sort:40 },
+  { id:'demo-club', active:true, category:'Western Food', nameTh:'คลับแซนด์วิช', nameEn:'Club Sandwich', nameZh:'总汇三明治', nameRu:'Клаб-сэндвич', tags:'Western', description:'ไก่ ไข่ เบคอน เสิร์ฟพร้อมเฟรนช์ฟรายส์', descriptionTh:'ไก่ ไข่ เบคอน เสิร์ฟพร้อมเฟรนช์ฟรายส์', descriptionEn:'Chicken, egg, bacon, served with French fries.', descriptionZh:'鸡肉、鸡蛋、培根，配薯条。', descriptionRu:'Курица, яйцо, бекон, подается с картофелем фри.', price:260, image:'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?q=80&w=600&auto=format&fit=crop', sort:50 },
+  { id:'demo-carbonara', active:true, category:'Western Food', nameTh:'สปาเก็ตตี้คาโบนาร่า', nameEn:'Spaghetti Carbonara', nameZh:'培根奶油意大利面', nameRu:'Спагетти Карбонара', tags:'Pasta', description:'ครีมซอส เบคอน ชีสพาร์เมซาน', descriptionTh:'ครีมซอส เบคอน ชีสพาร์เมซาน', descriptionEn:'Cream sauce, bacon, and parmesan cheese.', descriptionZh:'奶油酱、培根和帕玛森芝士。', descriptionRu:'Сливочный соус, бекон и сыр пармезан.', price:290, image:'https://images.unsplash.com/photo-1612874742237-6526221588e3?q=80&w=600&auto=format&fit=crop', sort:60 },
+  { id:'demo-burger', active:true, category:'Western Food', nameTh:'ชีสเบอร์เกอร์', nameEn:'Cheese Burger', nameZh:'芝士汉堡', nameRu:'Чизбургер', tags:'Burger', description:'เบอร์เกอร์เนื้อ/ไก่ เสิร์ฟพร้อมเฟรนช์ฟรายส์', descriptionTh:'เบอร์เกอร์เนื้อ/ไก่ เสิร์ฟพร้อมเฟรนช์ฟรายส์', descriptionEn:'Beef or chicken burger served with French fries.', descriptionZh:'牛肉或鸡肉汉堡，配薯条。', descriptionRu:'Бургер с говядиной или курицей, подается с картофелем фри.', price:320, image:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=600&auto=format&fit=crop', sort:70 },
+  { id:'demo-coke', active:true, category:'Beverage', nameTh:'โค้ก', nameEn:'Coca-Cola', nameZh:'可口可乐', nameRu:'Кока-Кола', tags:'Soft Drink', description:'กระป๋องเย็น', descriptionTh:'กระป๋องเย็น', descriptionEn:'Chilled can.', descriptionZh:'冰镇罐装。', descriptionRu:'Охлажденная банка.', price:70, image:'https://images.unsplash.com/photo-1554866585-cd94860890b7?q=80&w=600&auto=format&fit=crop', sort:80 },
+  { id:'demo-water', active:true, category:'Beverage', nameTh:'น้ำแร่', nameEn:'Mineral Water', nameZh:'矿泉水', nameRu:'Минеральная вода', tags:'Water', description:'น้ำแร่ขวด', descriptionTh:'น้ำแร่ขวด', descriptionEn:'Bottled mineral water.', descriptionZh:'瓶装矿泉水。', descriptionRu:'Бутилированная минеральная вода.', price:60, image:'https://images.unsplash.com/photo-1564419320461-6870880221ad?q=80&w=600&auto=format&fit=crop', sort:90 },
+  { id:'demo-coconut', active:true, category:'Beverage', nameTh:'มะพร้าวสด', nameEn:'Fresh Coconut', nameZh:'新鲜椰子', nameRu:'Свежий кокос', tags:'Fresh', description:'มะพร้าวเย็น สดชื่น', descriptionTh:'มะพร้าวเย็น สดชื่น', descriptionEn:'Cold fresh coconut.', descriptionZh:'冰镇新鲜椰子。', descriptionRu:'Охлажденный свежий кокос.', price:120, image:'https://images.unsplash.com/photo-1580984969071-a8da5656c2fb?q=80&w=600&auto=format&fit=crop', sort:100 }
 ];
 
 function readLS(key, fallback) {
@@ -46,8 +46,14 @@ export function fmtDate(value) {
   const d = value?.toDate ? value.toDate() : new Date(value);
   return Number.isNaN(d.getTime()) ? '-' : d.toLocaleString('th-TH', { dateStyle:'short', timeStyle:'short' });
 }
-export function statusText(status) {
-  return ({new:'รับออเดอร์ใหม่', preparing:'กำลังเตรียม', delivering:'กำลังนำส่ง', done:'สำเร็จ', cancelled:'ยกเลิก'})[status] || status;
+export function statusText(status, lang='TH') {
+  const map = {
+    TH:{new:'รับออเดอร์ใหม่', preparing:'กำลังเตรียม', delivering:'กำลังนำส่ง', done:'สำเร็จ', cancelled:'ยกเลิก'},
+    EN:{new:'New order', preparing:'Preparing', delivering:'Delivering', done:'Completed', cancelled:'Cancelled'},
+    ZH:{new:'新订单', preparing:'准备中', delivering:'配送中', done:'已完成', cancelled:'已取消'},
+    RU:{new:'Новый заказ', preparing:'Готовится', delivering:'Доставка', done:'Завершено', cancelled:'Отменено'}
+  };
+  return (map[lang] || map.TH)[status] || status;
 }
 
 export function listenMenu(callback, includeInactive=false, onError=null) {
@@ -81,7 +87,13 @@ export async function saveMenuItem(item) {
     category: item.category || 'Other',
     nameTh: item.nameTh || '',
     nameEn: item.nameEn || '',
-    description: item.description || '',
+    nameZh: item.nameZh || '',
+    nameRu: item.nameRu || '',
+    description: item.description || item.descriptionTh || '',
+    descriptionTh: item.descriptionTh || item.description || '',
+    descriptionEn: item.descriptionEn || '',
+    descriptionZh: item.descriptionZh || '',
+    descriptionRu: item.descriptionRu || '',
     price: Number(item.price || 0),
     image: item.image || '',
     sort: Number(item.sort || 999),
@@ -125,6 +137,7 @@ export async function createOrder(order) {
     items: order.items || [],
     note: order.note || '',
     total: Number(order.total || 0),
+    language: order.language || '',
     status: 'new',
     createdAtText: new Date().toISOString(),
     updatedAtText: new Date().toISOString()

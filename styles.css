@@ -75,3 +75,7 @@ img{max-width:100%}
 .status-pill.off{background:#f1f1f1;color:#888}
 .table td{vertical-align:middle}
 @media(max-width:900px){.action-stack{min-width:130px}.table{min-width:780px}}
+
+/* v2.3 multilingual admin fields */
+.lang-field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px}
+@media(max-width:720px){.lang-field-grid{grid-template-columns:1fr}}

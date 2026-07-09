@@ -9,19 +9,52 @@ let cart = new Map();
 let activeCategory = 'All';
 let orders = [];
 let unsubs = [];
-let lang = 'TH';
+
+const LANGS = ['TH', 'EN', 'ZH', 'RU'];
+let lang = LANGS.includes(localStorage.getItem('layaLang')) ? localStorage.getItem('layaLang') : 'TH';
+
+const I18N = {
+  TH: {
+    langBtn:'TH', cover:'Cover', environment:'Environment', roomMissing:'ไม่พบเลขห้องจาก QR Code กรุณาใส่เลขห้องเพื่อทดสอบระบบ', start:'เริ่ม', roomService:'LAYA Room Service', viewAll:'ดูทั้งหมด', all:'ทั้งหมด', allMenu:'เมนูทั้งหมด', spaServices:'Spa & บริการ', spaPromo:'Relaxing Spa Package', transportPromo:'Airport Transfer / Shuttle',
+    navHome:'หน้าแรก', navChat:'แชท', navOrders:'คำสั่งของฉัน', chatTitle:'แชทกับพนักงาน', chatDesc:'สอบถามเมนู แจ้งแพ้อาหาร ขอแม่บ้าน หรือบริการอื่น ๆ ได้ที่นี่', chatPlaceholder:'พิมพ์ข้อความถึงพนักงาน...', send:'ส่ง', ordersTitle:'คำสั่งของฉัน', ordersDesc:'ติดตามสถานะออเดอร์ล่าสุดของห้องนี้',
+    cart:'ตะกร้าอาหาร', items:'รายการ', openCart:'ดูตะกร้า', guestName:'ชื่อผู้สั่ง / Guest name', optional:'ไม่บังคับ', note:'หมายเหตุ', notePlaceholder:'เช่น ไม่เผ็ด / ขอช้อนเพิ่ม / แพ้อาหาร...', total:'รวมทั้งหมด', placeOrder:'ส่งออเดอร์',
+    noMenu:'ยังไม่มีเมนูในระบบ พนักงานสามารถเพิ่มได้จากหน้า Admin', noItems:'ยังไม่มีเมนู', noCart:'ยังไม่มีรายการอาหาร', needRoomOrder:'กรุณาใส่เลขห้องก่อนส่งออเดอร์', needMenu:'กรุณาเลือกเมนูก่อนส่งออเดอร์', orderSuccess:'ส่งออเดอร์แล้ว เลขอ้างอิง', orderFail:'ส่งออเดอร์ไม่สำเร็จ กรุณาแจ้งพนักงาน', needRoomOrders:'กรุณาใส่เลขห้องก่อนดูคำสั่งซื้อ', noOrders:'ยังไม่มีคำสั่งซื้อของห้องนี้', ref:'Ref', you:'คุณ', staff:'พนักงาน', system:'ระบบ', needRoomChat:'กรุณาใส่เลขห้องก่อนใช้แชท', chatEmpty:'เริ่มแชทกับพนักงานได้เลย', prefillToast:'พิมพ์ข้อความไว้ให้แล้ว กดส่งเพื่อแจ้งพนักงาน', languageToast:'เปลี่ยนภาษาเป็นภาษาไทยแล้ว', recommended:'เมนูแนะนำ', extraCutlery:'ช้อนส้อมเพิ่ม', kidsMenu:'อาหารเด็ก',
+    serviceRoom:'บริการอาหารในห้อง', serviceMinibar:'มินิบาร์', serviceHousekeeping:'งานแม่บ้าน', serviceTransport:'การขนส่ง', serviceFront:'แผนกต้อนรับ', serviceMaintenance:'การซ่อมบำรุง', serviceReview:'ทบทวน', serviceInfo:'ข้อมูลโรงแรม', serviceVoucher:'Voucher'
+  },
+  EN: {
+    langBtn:'EN', cover:'Cover', environment:'Environment', roomMissing:'Room number was not found from the QR code. Please enter a room number for testing.', start:'Start', roomService:'LAYA Room Service', viewAll:'View all', all:'All', allMenu:'All menu', spaServices:'Spa & Services', spaPromo:'Relaxing Spa Package', transportPromo:'Airport Transfer / Shuttle',
+    navHome:'Home', navChat:'Chat', navOrders:'My Orders', chatTitle:'Chat with Staff', chatDesc:'Ask about menus, allergies, housekeeping, or any hotel service here.', chatPlaceholder:'Type a message to staff...', send:'Send', ordersTitle:'My Orders', ordersDesc:'Track the latest order status for this room.',
+    cart:'Food Cart', items:'items', openCart:'View cart', guestName:'Guest name', optional:'Optional', note:'Note', notePlaceholder:'e.g. not spicy / extra cutlery / food allergy...', total:'Total', placeOrder:'Place order',
+    noMenu:'No menu items yet. Staff can add items from Admin.', noItems:'No menu items yet', noCart:'No food items in cart', needRoomOrder:'Please enter a room number before placing an order.', needMenu:'Please select menu items first.', orderSuccess:'Order sent. Reference', orderFail:'Order failed. Please contact staff.', needRoomOrders:'Please enter a room number before viewing orders.', noOrders:'No orders for this room yet.', ref:'Ref', you:'You', staff:'Staff', system:'System', needRoomChat:'Please enter a room number before using chat.', chatEmpty:'Start chatting with staff here.', prefillToast:'Message prepared. Tap Send to notify staff.', languageToast:'Language changed to English', recommended:'Recommended menu', extraCutlery:'Extra cutlery', kidsMenu:'Kids menu',
+    serviceRoom:'Room Service', serviceMinibar:'Minibar', serviceHousekeeping:'Housekeeping', serviceTransport:'Transportation', serviceFront:'Front Office', serviceMaintenance:'Maintenance', serviceReview:'Review', serviceInfo:'Hotel Info', serviceVoucher:'Voucher'
+  },
+  ZH: {
+    langBtn:'中文', cover:'封面', environment:'环境', roomMissing:'未从二维码中找到房号。请输入房号进行测试。', start:'开始', roomService:'LAYA 客房送餐', viewAll:'查看全部', all:'全部', allMenu:'全部菜单', spaServices:'水疗与服务', spaPromo:'放松水疗套餐', transportPromo:'机场接送 / 班车',
+    navHome:'首页', navChat:'聊天', navOrders:'我的订单', chatTitle:'与员工聊天', chatDesc:'可在这里咨询菜单、过敏、客房清洁或其他酒店服务。', chatPlaceholder:'输入给员工的消息...', send:'发送', ordersTitle:'我的订单', ordersDesc:'查看本房间最新订单状态。',
+    cart:'餐品购物车', items:'项', openCart:'查看购物车', guestName:'客人姓名', optional:'选填', note:'备注', notePlaceholder:'例如：不要辣 / 加餐具 / 食物过敏...', total:'总计', placeOrder:'提交订单',
+    noMenu:'系统中还没有菜单，员工可在 Admin 页面添加。', noItems:'暂无菜单', noCart:'购物车为空', needRoomOrder:'提交订单前请先输入房号。', needMenu:'请先选择菜单。', orderSuccess:'订单已发送，参考号', orderFail:'订单提交失败，请联系员工。', needRoomOrders:'查看订单前请先输入房号。', noOrders:'此房间暂无订单。', ref:'参考号', you:'您', staff:'员工', system:'系统', needRoomChat:'使用聊天前请先输入房号。', chatEmpty:'可在这里开始与员工聊天。', prefillToast:'消息已准备好，点击发送通知员工。', languageToast:'语言已切换为中文', recommended:'今日推荐', extraCutlery:'加餐具', kidsMenu:'儿童餐',
+    serviceRoom:'客房送餐', serviceMinibar:'迷你吧', serviceHousekeeping:'客房清洁', serviceTransport:'交通服务', serviceFront:'前台', serviceMaintenance:'维修服务', serviceReview:'评价', serviceInfo:'酒店信息', serviceVoucher:'优惠券'
+  },
+  RU: {
+    langBtn:'RU', cover:'Обложка', environment:'Окружение', roomMissing:'Номер комнаты не найден в QR-коде. Введите номер комнаты для теста.', start:'Начать', roomService:'LAYA Обслуживание в номере', viewAll:'Все', all:'Все', allMenu:'Все меню', spaServices:'Спа и услуги', spaPromo:'Расслабляющий спа-пакет', transportPromo:'Трансфер / шаттл',
+    navHome:'Главная', navChat:'Чат', navOrders:'Мои заказы', chatTitle:'Чат с персоналом', chatDesc:'Здесь можно спросить о меню, аллергиях, уборке или других услугах отеля.', chatPlaceholder:'Напишите сообщение персоналу...', send:'Отправить', ordersTitle:'Мои заказы', ordersDesc:'Отслеживайте статус заказов для этой комнаты.',
+    cart:'Корзина', items:'поз.', openCart:'Открыть корзину', guestName:'Имя гостя', optional:'Необязательно', note:'Примечание', notePlaceholder:'например: не остро / дополнительные приборы / аллергия...', total:'Итого', placeOrder:'Отправить заказ',
+    noMenu:'Пока нет меню. Сотрудник может добавить позиции в Admin.', noItems:'Пока нет меню', noCart:'Корзина пуста', needRoomOrder:'Введите номер комнаты перед отправкой заказа.', needMenu:'Сначала выберите блюда.', orderSuccess:'Заказ отправлен. Номер', orderFail:'Не удалось отправить заказ. Обратитесь к персоналу.', needRoomOrders:'Введите номер комнаты перед просмотром заказов.', noOrders:'Для этой комнаты пока нет заказов.', ref:'№', you:'Вы', staff:'Персонал', system:'Система', needRoomChat:'Введите номер комнаты перед использованием чата.', chatEmpty:'Начните чат с персоналом здесь.', prefillToast:'Сообщение подготовлено. Нажмите Отправить.', languageToast:'Язык изменен на русский', recommended:'Рекомендации', extraCutlery:'Приборы', kidsMenu:'Детское меню',
+    serviceRoom:'Обслуживание в номере', serviceMinibar:'Мини-бар', serviceHousekeeping:'Уборка', serviceTransport:'Транспорт', serviceFront:'Ресепшен', serviceMaintenance:'Ремонт', serviceReview:'Отзывы', serviceInfo:'Информация отеля', serviceVoucher:'Ваучер'
+  }
+};
 
 const fallbackImage = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=600&auto=format&fit=crop';
-const services = [
-  { id:'room-service', icon:'🍽️', label:'บริการอาหารในห้อง', hot:true, action:'menu' },
-  { id:'minibar', icon:'▰', label:'มินิบาร์', message:'ขอเติม/สอบถามมินิบาร์ในห้องนี้' },
-  { id:'housekeeping', icon:'🧹', label:'งานแม่บ้าน', message:'ขอใช้บริการแม่บ้านที่ห้องนี้' },
-  { id:'transport', icon:'🚐', label:'การขนส่ง', message:'ขอข้อมูลรถรับส่ง / Shuttle / Taxi' },
-  { id:'front', icon:'🛎️', label:'แผนกต้อนรับ', message:'ขอติดต่อแผนกต้อนรับ' },
-  { id:'maintenance', icon:'🛠️', label:'การซ่อมบำรุง', message:'ขอแจ้งซ่อมภายในห้องพักนี้' },
-  { id:'review', icon:'💬', label:'ทบทวน', message:'ต้องการให้พนักงานติดต่อกลับเรื่องรีวิว/ข้อเสนอแนะ' },
-  { id:'info', icon:'☷', label:'ข้อมูลโรงแรม', message:'ขอข้อมูลโรงแรมและเวลาเปิด-ปิดบริการต่าง ๆ' },
-  { id:'voucher', icon:'🎟️', label:'Voucher', message:'ขอสอบถาม Voucher / Promotion' }
+const serviceBase = [
+  { id:'room-service', icon:'🍽️', labelKey:'serviceRoom', hot:true, action:'menu' },
+  { id:'minibar', icon:'▰', labelKey:'serviceMinibar', message:{TH:'ขอเติม/สอบถามมินิบาร์ในห้องนี้',EN:'Please assist with minibar for this room.',ZH:'请协助处理本房间迷你吧。',RU:'Пожалуйста, помогите с мини-баром в этой комнате.'} },
+  { id:'housekeeping', icon:'🧹', labelKey:'serviceHousekeeping', message:{TH:'ขอใช้บริการแม่บ้านที่ห้องนี้',EN:'Please send housekeeping to this room.',ZH:'请安排客房清洁服务。',RU:'Пожалуйста, пришлите уборку в эту комнату.'} },
+  { id:'transport', icon:'🚐', labelKey:'serviceTransport', message:{TH:'ขอข้อมูลรถรับส่ง / Shuttle / Taxi',EN:'Please send shuttle / taxi information.',ZH:'请提供接送/出租车信息。',RU:'Пожалуйста, пришлите информацию о трансфере/такси.'} },
+  { id:'front', icon:'🛎️', labelKey:'serviceFront', message:{TH:'ขอติดต่อแผนกต้อนรับ',EN:'Please contact me from Front Office.',ZH:'请前台联系我。',RU:'Пожалуйста, свяжитесь со мной с ресепшена.'} },
+  { id:'maintenance', icon:'🛠️', labelKey:'serviceMaintenance', message:{TH:'ขอแจ้งซ่อมภายในห้องพักนี้',EN:'I would like to report a maintenance issue in this room.',ZH:'我想报告房间内的维修问题。',RU:'Я хочу сообщить о проблеме с ремонтом в комнате.'} },
+  { id:'review', icon:'💬', labelKey:'serviceReview', message:{TH:'ต้องการให้พนักงานติดต่อกลับเรื่องรีวิว/ข้อเสนอแนะ',EN:'Please contact me about feedback / review.',ZH:'请就评价/反馈联系我。',RU:'Пожалуйста, свяжитесь со мной по отзыву/предложению.'} },
+  { id:'info', icon:'☷', labelKey:'serviceInfo', message:{TH:'ขอข้อมูลโรงแรมและเวลาเปิด-ปิดบริการต่าง ๆ',EN:'Please send hotel information and service hours.',ZH:'请提供酒店信息和服务时间。',RU:'Пожалуйста, пришлите информацию об отеле и часах работы услуг.'} },
+  { id:'voucher', icon:'🎟️', labelKey:'serviceVoucher', message:{TH:'ขอสอบถาม Voucher / Promotion',EN:'Please send voucher / promotion information.',ZH:'请提供优惠券/促销信息。',RU:'Пожалуйста, пришлите информацию о ваучерах/акциях.'} }
 ];
 
 $('hotelName').textContent = HOTEL_NAME;
@@ -29,6 +62,56 @@ if (isDemo) {
   $('modePill').classList.remove('hidden');
   $('modePill').classList.add('demo');
   $('modePill').textContent = 'Demo';
+}
+
+function t(key) { return I18N[lang]?.[key] || I18N.EN[key] || key; }
+function itemName(item) { return item[`name${lang}`] || item.nameTh || item.nameEn || item.nameZh || item.nameRu || 'Unnamed item'; }
+function itemDesc(item) { return item[`description${lang}`] || item.description || item.descriptionTh || item.descriptionEn || item.descriptionZh || item.descriptionRu || item.nameEn || item.category || ''; }
+function categoryLabel(cat) { return cat === 'All' ? t('all') : cat; }
+function messageFor(obj) { return typeof obj === 'string' ? obj : (obj?.[lang] || obj?.TH || obj?.EN || ''); }
+
+function applyTranslations() {
+  document.documentElement.lang = lang === 'TH' ? 'th' : lang === 'ZH' ? 'zh-CN' : lang === 'RU' ? 'ru' : 'en';
+  $('langToggle').textContent = t('langBtn');
+  $('coverTabText').textContent = t('cover');
+  $('environmentTabText').textContent = t('environment');
+  $('roomMissingText').textContent = t('roomMissing');
+  $('saveManualRoom').textContent = t('start');
+  $('manualRoom').placeholder = lang === 'TH' ? 'เช่น A101' : 'e.g. A101';
+  $('roomServiceTitle').textContent = t('roomService');
+  $('viewAllMenuText').textContent = t('viewAll');
+  $('viewAllSpaText').textContent = t('viewAll');
+  $('spaTitle').textContent = t('spaServices');
+  $('spaPromoTitle').textContent = t('spaPromo');
+  $('transportPromoTitle').textContent = t('transportPromo');
+  $('navHomeText').textContent = t('navHome');
+  $('navChatText').textContent = t('navChat');
+  $('navOrdersText').textContent = t('navOrders');
+  $('chatPageTitle').textContent = t('chatTitle');
+  $('chatPageDesc').textContent = t('chatDesc');
+  $('chatInput').placeholder = t('chatPlaceholder');
+  $('sendChat').textContent = t('send');
+  $('ordersPageTitle').textContent = t('ordersTitle');
+  $('ordersPageDesc').textContent = t('ordersDesc');
+  $('cartTitle').textContent = t('cart');
+  $('cartBarItemsText').textContent = t('items');
+  $('cartBarOpenText').textContent = t('openCart');
+  $('guestNameLabel').textContent = t('guestName');
+  $('guestName').placeholder = t('optional');
+  $('orderNoteLabel').textContent = t('note');
+  $('orderNote').placeholder = t('notePlaceholder');
+  $('cartTotalText').textContent = t('total');
+  $('placeOrder').textContent = t('placeOrder');
+  $('viewAllSpa').dataset.servicePrefill = lang === 'TH' ? 'ขอข้อมูล Spa Promotion' : lang === 'ZH' ? '请提供水疗促销信息。' : lang === 'RU' ? 'Пожалуйста, пришлите информацию о спа-акциях.' : 'Please send Spa promotion information.';
+  $('spaPromoRow').dataset.servicePrefill = lang === 'TH' ? 'สนใจโปรโมชันสปา กรุณาส่งรายละเอียดให้หน่อย' : lang === 'ZH' ? '我对水疗促销感兴趣，请发送详情。' : lang === 'RU' ? 'Меня интересует спа-акция, пришлите детали.' : 'I am interested in the spa promotion. Please send details.';
+  $('transportPromoRow').dataset.servicePrefill = lang === 'TH' ? 'ขอจองรถรับส่ง กรุณาติดต่อกลับที่ห้องนี้' : lang === 'ZH' ? '我想预订接送服务，请联系本房间。' : lang === 'RU' ? 'Я хочу заказать трансфер, пожалуйста, свяжитесь с этой комнатой.' : 'I would like to book transportation. Please contact this room.';
+  renderServiceGrid();
+  renderQuickChat();
+  renderCategoryStrip();
+  renderMenuSections();
+  renderAllMenuList($('allMenuTitle')?.dataset?.category || activeCategory);
+  renderCart();
+  renderOrders(orders);
 }
 
 function setRoom(value) {
@@ -60,19 +143,30 @@ listenMenu((items) => {
   if (!categories().includes(activeCategory)) activeCategory = 'All';
   renderCategoryStrip();
   renderMenuSections();
-  renderAllMenuList();
+  renderAllMenuList($('allMenuTitle')?.dataset?.category || activeCategory);
 });
 
 renderServiceGrid();
+renderQuickChat();
 renderCart();
+applyTranslations();
 
 function renderServiceGrid() {
-  $('serviceGrid').innerHTML = services.map(s => `
-    <button class="service-btn ${s.hot ? 'hot' : ''}" data-service-id="${escapeAttr(s.id)}" ${s.message ? `data-service-prefill="${escapeAttr(s.message)}"` : ''}>
+  $('serviceGrid').innerHTML = serviceBase.map(s => `
+    <button class="service-btn ${s.hot ? 'hot' : ''}" data-service-id="${escapeAttr(s.id)}" ${s.message ? `data-service-prefill="${escapeAttr(messageFor(s.message))}"` : ''}>
       <span class="service-icon" aria-hidden="true">${s.icon}</span>
-      <small>${escapeHtml(s.label)}</small>
+      <small>${escapeHtml(t(s.labelKey))}</small>
     </button>
   `).join('');
+}
+
+function renderQuickChat() {
+  const quick = [
+    { label:t('recommended'), text:{TH:'ขอเมนูแนะนำสำหรับวันนี้',EN:'Please recommend today’s menu.',ZH:'请推荐今日菜单。',RU:'Пожалуйста, порекомендуйте меню на сегодня.'} },
+    { label:t('extraCutlery'), text:{TH:'ขอช้อนส้อมเพิ่ม',EN:'Please send extra cutlery.',ZH:'请送额外餐具。',RU:'Пожалуйста, принесите дополнительные приборы.'} },
+    { label:t('kidsMenu'), text:{TH:'มีอาหารสำหรับเด็กไหม',EN:'Do you have a kids menu?',ZH:'有儿童菜单吗？',RU:'Есть ли детское меню?'} }
+  ];
+  $('quickChat').innerHTML = quick.map(q => `<button data-quick="${escapeAttr(messageFor(q.text))}">${escapeHtml(q.label)}</button>`).join('');
 }
 
 function categories() {
@@ -93,21 +187,21 @@ function groupedItems() {
 
 function renderCategoryStrip() {
   $('categoryStrip').innerHTML = categories().map(cat => `
-    <button class="category-chip ${cat === activeCategory ? 'active' : ''}" data-category="${escapeAttr(cat)}">${cat === 'All' ? 'ทั้งหมด' : escapeHtml(cat)}</button>
+    <button class="category-chip ${cat === activeCategory ? 'active' : ''}" data-category="${escapeAttr(cat)}">${escapeHtml(categoryLabel(cat))}</button>
   `).join('');
 }
 
 function renderMenuSections() {
   const groups = groupedItems();
   if (!groups.length) {
-    $('menuSections').innerHTML = '<div class="empty-state">ยังไม่มีเมนูในระบบ พนักงานสามารถเพิ่มได้จากหน้า Admin</div>';
+    $('menuSections').innerHTML = `<div class="empty-state">${escapeHtml(t('noMenu'))}</div>`;
     return;
   }
   $('menuSections').innerHTML = groups.map(group => `
     <section class="menu-category-section" id="cat-${slug(group.category)}">
       <div class="menu-category-head">
         <h3>${escapeHtml(group.category)}</h3>
-        <button class="view-all" data-open-category="${escapeAttr(group.category)}">ดูทั้งหมด <span>▶</span></button>
+        <button class="view-all" data-open-category="${escapeAttr(group.category)}">${escapeHtml(t('viewAll'))} <span>▶</span></button>
       </div>
       <div class="horizontal-products">
         ${group.items.slice(0, 12).map(productCard).join('')}
@@ -117,7 +211,7 @@ function renderMenuSections() {
 }
 
 function productCard(item) {
-  const name = item.nameTh || item.nameEn || 'Unnamed item';
+  const name = itemName(item);
   const qty = cart.get(item.id)?.qty || 0;
   return `
     <article class="product-card">
@@ -136,19 +230,19 @@ function productCard(item) {
 function renderAllMenuList(category = activeCategory) {
   if (!$('allMenuList')) return;
   const rows = itemsForCategory(category || 'All');
-  $('allMenuTitle').textContent = category && category !== 'All' ? category : 'เมนูทั้งหมด';
+  $('allMenuTitle').textContent = category && category !== 'All' ? category : t('allMenu');
   if (!rows.length) {
-    $('allMenuList').innerHTML = '<div class="empty-state">ยังไม่มีเมนู</div>';
+    $('allMenuList').innerHTML = `<div class="empty-state">${escapeHtml(t('noItems'))}</div>`;
     return;
   }
   $('allMenuList').innerHTML = rows.map(item => {
-    const name = item.nameTh || item.nameEn || 'Unnamed item';
+    const name = itemName(item);
     return `
       <article class="all-menu-item">
         <img src="${escapeAttr(item.image || fallbackImage)}" alt="${escapeAttr(name)}" loading="lazy" onerror="this.src='${fallbackImage}'" />
         <div>
           <h4>${escapeHtml(name)}</h4>
-          <p>${escapeHtml(item.description || item.nameEn || item.category || '')}</p>
+          <p>${escapeHtml(itemDesc(item))}</p>
           <strong class="price">${thb(item.price)}</strong>
         </div>
         <button class="add-btn" style="position:static" data-plus="${escapeAttr(item.id)}">+</button>
@@ -178,11 +272,11 @@ function renderCart() {
   $('cartBar').classList.toggle('hidden', !count);
   $('cartTotal').textContent = thb(sum);
   if (!rows.length) {
-    $('cartItems').innerHTML = '<div class="empty-state">ยังไม่มีรายการอาหาร</div>';
+    $('cartItems').innerHTML = `<div class="empty-state">${escapeHtml(t('noCart'))}</div>`;
     return;
   }
   $('cartItems').innerHTML = rows.map(({item, qty}) => {
-    const name = item.nameTh || item.nameEn || 'Unnamed item';
+    const name = itemName(item);
     return `
       <div class="guest-cart-row">
         <div><h4>${escapeHtml(name)}</h4><small>${qty} x ${thb(item.price)} = ${thb(qty * Number(item.price || 0))}</small></div>
@@ -197,9 +291,9 @@ function total() {
 }
 
 $('placeOrder').addEventListener('click', async () => {
-  if (!room) return showOrderResult('กรุณาใส่เลขห้องก่อนส่งออเดอร์', 'bad');
+  if (!room) return showOrderResult(t('needRoomOrder'), 'bad');
   const rows = Array.from(cart.values());
-  if (!rows.length) return showOrderResult('กรุณาเลือกเมนูก่อนส่งออเดอร์', 'bad');
+  if (!rows.length) return showOrderResult(t('needMenu'), 'bad');
   $('placeOrder').disabled = true;
   try {
     const order = await createOrder({
@@ -207,9 +301,14 @@ $('placeOrder').addEventListener('click', async () => {
       guestName: $('guestName').value.trim(),
       note: $('orderNote').value.trim(),
       total: total(),
+      language: lang,
       items: rows.map(({item, qty}) => ({
         id:item.id,
-        name:item.nameTh || item.nameEn,
+        name:itemName(item),
+        nameTh:item.nameTh || '',
+        nameEn:item.nameEn || '',
+        nameZh:item.nameZh || '',
+        nameRu:item.nameRu || '',
         price:Number(item.price || 0),
         qty,
         subtotal:qty * Number(item.price || 0)
@@ -221,12 +320,12 @@ $('placeOrder').addEventListener('click', async () => {
     renderAllMenuList();
     $('orderNote').value = '';
     closeDrawer('cartDrawer');
-    toast(`ส่งออเดอร์แล้ว เลขอ้างอิง ${String(order.id).slice(-6).toUpperCase()}`);
-    await sendChat(room, 'system', `ลูกค้าส่งออเดอร์ใหม่ ${thb(order.total)}`);
+    toast(`${t('orderSuccess')} ${String(order.id).slice(-6).toUpperCase()}`);
+    await sendChat(room, 'system', `${t('orderSuccess')} ${thb(order.total)}`);
     setPage('ordersPage');
   } catch (err) {
     console.error(err);
-    showOrderResult('ส่งออเดอร์ไม่สำเร็จ กรุณาแจ้งพนักงาน', 'bad');
+    showOrderResult(t('orderFail'), 'bad');
   } finally {
     $('placeOrder').disabled = false;
   }
@@ -239,41 +338,41 @@ function showOrderResult(text, type) {
 function renderOrders(items) {
   orders = items || [];
   if (!room) {
-    $('ordersList').innerHTML = '<div class="empty-state">กรุณาใส่เลขห้องก่อนดูคำสั่งซื้อ</div>';
+    $('ordersList').innerHTML = `<div class="empty-state">${escapeHtml(t('needRoomOrders'))}</div>`;
     return;
   }
   if (!orders.length) {
-    $('ordersList').innerHTML = '<div class="empty-state">ยังไม่มีคำสั่งซื้อของห้องนี้</div>';
+    $('ordersList').innerHTML = `<div class="empty-state">${escapeHtml(t('noOrders'))}</div>`;
     return;
   }
   $('ordersList').innerHTML = orders.map(o => `
     <article class="guest-order-card">
       <div style="display:flex;justify-content:space-between;gap:10px;align-items:start">
-        <div><h3>Room ${escapeHtml(o.room)}</h3><div class="order-meta">${fmtDate(o.createdAtText)} • Ref ${String(o.id || '').slice(-6).toUpperCase()}</div></div>
-        <span class="status ${escapeAttr(o.status)}">${statusText(o.status)}</span>
+        <div><h3>Room ${escapeHtml(o.room)}</h3><div class="order-meta">${fmtDate(o.createdAtText)} • ${escapeHtml(t('ref'))} ${String(o.id || '').slice(-6).toUpperCase()}</div></div>
+        <span class="status ${escapeAttr(o.status)}">${statusText(o.status, lang)}</span>
       </div>
       <ol>${(o.items || []).map(i => `<li>${escapeHtml(i.name)} x ${i.qty} <strong>${thb(i.subtotal)}</strong></li>`).join('')}</ol>
-      ${o.note ? `<div class="notice warn"><strong>หมายเหตุ:</strong> ${escapeHtml(o.note)}</div>` : ''}
-      <div class="drawer-total"><span>Total</span><strong>${thb(o.total)}</strong></div>
+      ${o.note ? `<div class="notice warn"><strong>${escapeHtml(t('note'))}:</strong> ${escapeHtml(o.note)}</div>` : ''}
+      <div class="drawer-total"><span>${escapeHtml(t('total'))}</span><strong>${thb(o.total)}</strong></div>
     </article>
   `).join('');
 }
 
 function renderChat(messages) {
   if (!room) {
-    $('chatMessages').innerHTML = '<div class="empty-state">กรุณาใส่เลขห้องก่อนใช้แชท</div>';
+    $('chatMessages').innerHTML = `<div class="empty-state">${escapeHtml(t('needRoomChat'))}</div>`;
     return;
   }
   $('chatMessages').innerHTML = messages.length ? messages.map(m => `
-    <div class="msg ${m.sender === 'guest' ? 'me' : ''}">${escapeHtml(m.text)}<small>${m.sender === 'guest' ? 'คุณ' : m.sender === 'staff' ? 'พนักงาน' : 'ระบบ'} • ${fmtDate(m.createdAtText)}</small></div>
-  `).join('') : '<div class="empty-state">เริ่มแชทกับพนักงานได้เลย</div>';
+    <div class="msg ${m.sender === 'guest' ? 'me' : ''}">${escapeHtml(m.text)}<small>${m.sender === 'guest' ? t('you') : m.sender === 'staff' ? t('staff') : t('system')} • ${fmtDate(m.createdAtText)}</small></div>
+  `).join('') : `<div class="empty-state">${escapeHtml(t('chatEmpty'))}</div>`;
   $('chatMessages').scrollTop = $('chatMessages').scrollHeight;
 }
 
 $('sendChat').addEventListener('click', sendGuestChat);
 $('chatInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendGuestChat(); });
 async function sendGuestChat() {
-  if (!room) return toast('กรุณาใส่เลขห้องก่อนใช้แชท');
+  if (!room) return toast(t('needRoomChat'));
   const text = $('chatInput').value.trim();
   if (!text) return;
   $('chatInput').value = '';
@@ -283,7 +382,7 @@ async function sendGuestChat() {
 function setPage(pageId) {
   document.querySelectorAll('.app-page').forEach(page => page.classList.toggle('active', page.id === pageId));
   document.querySelectorAll('.nav-item').forEach(btn => btn.classList.toggle('active', btn.dataset.page === pageId));
-  window.scrollTo({ top: pageId === 'homePage' ? 0 : Math.max(0, $('phone-app')?.offsetTop || 0), behavior:'smooth' });
+  window.scrollTo({ top: pageId === 'homePage' ? 0 : Math.max(0, $('phoneApp')?.offsetTop || 0), behavior:'smooth' });
 }
 
 document.addEventListener('click', (e) => {
@@ -319,7 +418,7 @@ document.addEventListener('click', (e) => {
     setPage('chatPage');
     $('chatInput').value = prefill.dataset.servicePrefill;
     $('chatInput').focus();
-    toast('พิมพ์ข้อความไว้ให้แล้ว กดส่งเพื่อแจ้งพนักงาน');
+    toast(t('prefillToast'));
   }
 });
 
@@ -346,15 +445,19 @@ function closeDrawer(id) {
   $('orderResult').innerHTML = '';
 }
 
-document.querySelectorAll('[data-quick]').forEach(btn => btn.addEventListener('click', () => {
-  $('chatInput').value = btn.dataset.quick;
+document.addEventListener('click', (e) => {
+  const quick = e.target.closest('[data-quick]');
+  if (!quick) return;
+  $('chatInput').value = quick.dataset.quick;
   $('chatInput').focus();
-}));
+});
 
 $('langToggle').addEventListener('click', () => {
-  lang = lang === 'TH' ? 'EN' : 'TH';
-  $('langToggle').textContent = lang;
-  toast(lang === 'TH' ? 'ภาษาไทย' : 'English mode: v1.1 will translate full labels later');
+  const i = LANGS.indexOf(lang);
+  lang = LANGS[(i + 1) % LANGS.length];
+  localStorage.setItem('layaLang', lang);
+  applyTranslations();
+  toast(t('languageToast'));
 });
 
 function toast(text) {

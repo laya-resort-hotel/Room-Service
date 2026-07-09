@@ -29,7 +29,7 @@
   <main class="container">
     <section class="hero">
       <h1>แก้ไขเมนูอาหารและราคา</h1>
-      <p>เพิ่ม/แก้ไข/ลบเมนูได้จากหน้านี้ ข้อมูลจะอัปเดตไปหน้าลูกค้าแบบ Realtime เมื่อเชื่อม Firebase แล้ว</p>
+      <p>รองรับชื่อเมนู/รายละเอียด 4 ภาษา: ไทย อังกฤษ จีน รัสเซีย ลูกค้าเปลี่ยนภาษาได้จากปุ่มมุมขวาบนของหน้า QR</p>
     </section>
 
     <section class="grid">
@@ -37,10 +37,21 @@
         <h2 id="formTitle">เพิ่มเมนูใหม่</h2>
         <div id="editHint" class="notice hidden" style="margin-bottom:12px">กำลังแก้ไขเมนูเดิม กดบันทึกเพื่ออัปเดตข้อมูล/รูปภาพ</div>
         <input type="hidden" id="itemId" />
-        <div class="field"><label>หมวดหมู่</label><input id="category" placeholder="เช่น Thai Food / Western / Beverage" required /></div>
-        <div class="field"><label>ชื่อเมนูภาษาไทย</label><input id="nameTh" placeholder="ผัดไทยกุ้ง" required /></div>
-        <div class="field"><label>ชื่อเมนูภาษาอังกฤษ</label><input id="nameEn" placeholder="Pad Thai Goong" /></div>
-        <div class="field"><label>รายละเอียด</label><textarea id="description" placeholder="รายละเอียดเมนู / วัตถุดิบ / หมายเหตุแพ้อาหาร"></textarea></div>
+        <div class="field"><label>หมวดหมู่ / Category</label><input id="category" placeholder="เช่น Room Service / Western Food / Beverage" required /></div>
+
+        <div class="notice good" style="margin-bottom:12px"><b>ข้อมูล 4 ภาษา</b> ถ้ายังไม่ใส่ภาษาจีน/รัสเซีย ระบบจะแสดงชื่อไทยหรืออังกฤษแทนชั่วคราว</div>
+        <div class="lang-field-grid">
+          <div class="field"><label>ชื่อเมนูภาษาไทย</label><input id="nameTh" placeholder="ผัดไทยกุ้ง" required /></div>
+          <div class="field"><label>Menu name English</label><input id="nameEn" placeholder="Pad Thai Goong" /></div>
+          <div class="field"><label>中文菜单名称</label><input id="nameZh" placeholder="泰式炒河粉配虾" /></div>
+          <div class="field"><label>Название на русском</label><input id="nameRu" placeholder="Пад Тай с креветками" /></div>
+        </div>
+
+        <div class="field"><label>รายละเอียดภาษาไทย</label><textarea id="descriptionTh" placeholder="รายละเอียดเมนู / วัตถุดิบ / หมายเหตุแพ้อาหาร"></textarea></div>
+        <div class="field"><label>Description English</label><textarea id="descriptionEn" placeholder="Menu details / ingredients / allergy note"></textarea></div>
+        <div class="field"><label>中文说明</label><textarea id="descriptionZh" placeholder="菜单说明 / 食材 / 过敏提示"></textarea></div>
+        <div class="field"><label>Описание на русском</label><textarea id="descriptionRu" placeholder="Описание / ингредиенты / аллергены"></textarea></div>
+
         <div class="field"><label>ราคา</label><input id="price" type="number" min="0" step="1" placeholder="240" required /></div>
         <div class="field"><label>ลำดับแสดงผล</label><input id="sort" type="number" min="0" step="1" value="999" /></div>
         <div class="field"><label>สถานะเมนู</label><label class="switch-row"><input id="active" type="checkbox" checked /> เปิดขาย/แสดงในหน้าลูกค้า</label></div>
@@ -52,7 +63,7 @@
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button id="saveBtn" class="primary" type="submit">บันทึกเมนูใหม่</button>
           <button class="secondary" type="button" id="resetForm">ล้างฟอร์ม / ยกเลิกแก้ไข</button>
-          <button class="secondary" type="button" id="seedMenu">ใส่เมนูตัวอย่าง</button>
+          <button class="secondary" type="button" id="seedMenu">ใส่เมนูตัวอย่าง 4 ภาษา</button>
         </div>
       </form>
 
@@ -62,7 +73,7 @@
         <div id="menuCount" class="notice" style="margin-bottom:12px">กำลังโหลด...</div>
         <div style="overflow:auto">
           <table class="table">
-            <thead><tr><th>รูป</th><th>เมนู</th><th>หมวด</th><th>ราคา</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+            <thead><tr><th>รูป</th><th>เมนู 4 ภาษา</th><th>หมวด</th><th>ราคา</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
             <tbody id="menuTable"></tbody>
           </table>
         </div>

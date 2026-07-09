@@ -39,7 +39,13 @@ $('menuForm').addEventListener('submit', async (e) => {
     category: $('category').value.trim(),
     nameTh: $('nameTh').value.trim(),
     nameEn: $('nameEn').value.trim(),
-    description: $('description').value.trim(),
+    nameZh: $('nameZh').value.trim(),
+    nameRu: $('nameRu').value.trim(),
+    description: $('descriptionTh').value.trim(),
+    descriptionTh: $('descriptionTh').value.trim(),
+    descriptionEn: $('descriptionEn').value.trim(),
+    descriptionZh: $('descriptionZh').value.trim(),
+    descriptionRu: $('descriptionRu').value.trim(),
     price: Number($('price').value || 0),
     sort: Number($('sort').value || 999),
     image: $('image').value.trim(),
@@ -94,7 +100,7 @@ function renderTable() {
   if (!menu.length) { $('menuTable').innerHTML = '<tr><td colspan="6" class="empty">ยังไม่มีเมนู</td></tr>'; return; }
   $('menuTable').innerHTML = menu.map(item => `<tr>
     <td><img class="menu-admin-img" src="${escapeHtml(item.image || '')}" onerror="this.style.display='none'" /></td>
-    <td><strong>${escapeHtml(item.nameTh || item.nameEn)}</strong><br><small style="color:var(--muted)">${escapeHtml(item.nameEn || '')}</small><br><small style="color:var(--muted)">${escapeHtml(item.description || '')}</small></td>
+    <td><strong>TH: ${escapeHtml(item.nameTh || '')}</strong><br><small style="color:var(--muted)">EN: ${escapeHtml(item.nameEn || '')}</small><br><small style="color:var(--muted)">中文: ${escapeHtml(item.nameZh || '')}</small><br><small style="color:var(--muted)">RU: ${escapeHtml(item.nameRu || '')}</small><br><small style="color:var(--muted)">${escapeHtml(item.descriptionTh || item.description || '')}</small></td>
     <td>${escapeHtml(item.category || '')}<br><small style="color:var(--muted)">ลำดับ ${Number(item.sort ?? 999)}</small></td>
     <td>${thb(item.price)}</td>
     <td>${item.active === false ? '<span class="status-pill off">ปิดขาย</span>' : '<span class="status-pill">เปิดขาย</span>'}</td>
@@ -118,7 +124,12 @@ function editItem(id) {
   $('category').value = item.category || '';
   $('nameTh').value = item.nameTh || '';
   $('nameEn').value = item.nameEn || '';
-  $('description').value = item.description || '';
+  $('nameZh').value = item.nameZh || '';
+  $('nameRu').value = item.nameRu || '';
+  $('descriptionTh').value = item.descriptionTh || item.description || '';
+  $('descriptionEn').value = item.descriptionEn || '';
+  $('descriptionZh').value = item.descriptionZh || '';
+  $('descriptionRu').value = item.descriptionRu || '';
   $('price').value = item.price || 0;
   $('sort').value = item.sort || 999;
   $('image').value = item.image || '';
