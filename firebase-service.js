@@ -50,7 +50,7 @@ export function statusText(status) {
   return ({new:'รับออเดอร์ใหม่', preparing:'กำลังเตรียม', delivering:'กำลังนำส่ง', done:'สำเร็จ', cancelled:'ยกเลิก'})[status] || status;
 }
 
-export function listenMenu(callback, includeInactive=false) {
+export function listenMenu(callback, includeInactive=false, onError=null) {
   if (isDemo) {
     ensureDemoMenu();
     let last = '';
@@ -72,7 +72,7 @@ export function listenMenu(callback, includeInactive=false) {
     const filtered = includeInactive ? items : items.filter(x => x.active !== false);
     filtered.sort((a,b) => (a.sort ?? 999) - (b.sort ?? 999) || String(a.category).localeCompare(String(b.category)));
     callback(filtered);
-  });
+  }, err => { if (onError) onError(err); else console.error(err); });
 }
 
 export async function saveMenuItem(item) {
@@ -162,7 +162,7 @@ export function listenOrders(callback, room=null) {
     if (roomSafe) orders = orders.filter(x => safeRoom(x.room) === roomSafe);
     orders.sort((a,b) => new Date(b.createdAtText || 0) - new Date(a.createdAtText || 0));
     callback(orders);
-  });
+  }, err => console.error('listenOrders error', err));
 }
 
 export async function updateOrderStatus(id, status) {
@@ -195,7 +195,7 @@ export function listenChat(room, callback) {
   return onSnapshot(collection(db, 'chats', r, 'messages'), snap => {
     const msgs = snap.docs.map(d => ({ id:d.id, ...d.data() })).sort((a,b) => new Date(a.createdAtText || 0) - new Date(b.createdAtText || 0));
     callback(msgs);
-  });
+  }, err => console.error('listenChat error', err));
 }
 
 export async function sendChat(room, sender, text) {

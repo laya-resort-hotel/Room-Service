@@ -62,3 +62,16 @@ img{max-width:100%}
 @media(max-width:860px){.grid,.staff-layout{grid-template-columns:1fr}.cart{position:static}.category-tabs{top:67px}.header{align-items:flex-start}.brand{min-width:0}.room-pill{font-size:12px;padding:7px 9px}.hero h1{font-size:22px}.container{padding:12px}.menu-item{grid-template-columns:82px 1fr}.menu-img{width:82px;height:82px}.chat-box{height:360px}.order-head{flex-direction:column}.toolbar{display:grid}.toolbar>*{width:100%}}
 @media(max-width:430px){.guest-cover{height:282px}.guest-sheet{padding:24px 16px 24px}.guest-head h1{font-size:27px}.service-grid{gap:18px 8px}.service-icon{width:52px;height:52px;font-size:38px}.service-btn small{font-size:15px}.section-title-row h2{font-size:23px}.product-card{min-width:172px;max-width:172px}.product-card img{height:116px}.product-body h4{font-size:17px}.promo-row{gap:14px}.promo-row img{height:116px}.promo-row h3{font-size:18px}.promo-row p{font-size:16px}.bottom-nav{height:80px}.nav-item small{font-size:15px}.nav-item span{font-size:32px}.cart-bar{bottom:92px}.guest-chat-card{height:calc(100vh - 230px)}}
 @media print{.header,.hero,.toolbar,.no-print{display:none!important}body{background:#fff}.container{width:100%;padding:0}.qr-grid{grid-template-columns:repeat(3,1fr);gap:8px}.qr-card{box-shadow:none;border:1px solid #bbb;border-radius:8px;padding:8px}.qr-card canvas{width:110px!important;height:110px!important}.qr-card h3{font-size:14px}.qr-card p{font-size:9px}.card{box-shadow:none;border:0}}
+
+
+/* v2.2 admin edit improvements */
+.switch-row{display:flex;gap:10px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#fff;font-weight:700;color:var(--text)}
+.switch-row input{width:20px;height:20px;accent-color:var(--brand)}
+.image-preview-wrap{margin:8px 0 12px;padding:10px;border:1px solid var(--line);border-radius:18px;background:#fff}
+.image-preview-wrap img{width:100%;max-height:220px;object-fit:cover;border-radius:14px;display:block}
+.action-stack{display:flex;flex-direction:column;gap:8px;min-width:150px}
+.action-stack button{width:100%;padding:10px 12px;font-weight:800}
+.status-pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:800;background:#e8f6f0;color:#1f7a63;white-space:nowrap}
+.status-pill.off{background:#f1f1f1;color:#888}
+.table td{vertical-align:middle}
+@media(max-width:900px){.action-stack{min-width:130px}.table{min-width:780px}}
