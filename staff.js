@@ -19,10 +19,12 @@ const originalTitle = document.title;
 const ALERT_SOUND_URL = './alert-sound.mp3';
 let alertAudio = null;
 let fallbackToneTimer = null;
+let autoPrintEnabled = localStorage.getItem('laya.rs.autoPrintOrders') === '1';
 
 $('hotelName').textContent = HOTEL_NAME;
 if (isDemo) { $('modePill').classList.remove('hidden'); $('modePill').classList.add('demo'); $('modePill').textContent = 'Demo Mode'; }
 updateAlertButton();
+updateAutoPrintButton();
 
 function unlock() { sessionStorage.setItem('layaStaffOk', '1'); $('pinGate').classList.add('hidden'); unlockAudioForBrowser(); updateAlertButton(); start(); }
 if (sessionStorage.getItem('layaStaffOk') === '1') unlock();
@@ -39,6 +41,8 @@ if ($('alertOpenChat')) $('alertOpenChat').addEventListener('click', () => {
 if ($('alertSilence')) $('alertSilence').addEventListener('click', stopAlertSoundOnly);
 if ($('alertDismiss')) $('alertDismiss').addEventListener('click', hideStaffAlert);
 if ($('closeChatRoom')) $('closeChatRoom').addEventListener('click', closeActiveChatRoom);
+if ($('autoPrintOrders')) $('autoPrintOrders').addEventListener('click', toggleAutoPrintOrders);
+if ($('printVisibleOrders')) $('printVisibleOrders').addEventListener('click', () => printOrdersTicket(filteredOrders()));
 
 function start() {
   listenOrders((orders) => {
@@ -76,6 +80,7 @@ function renderOrders() {
     await updateOrderStatus(btn.dataset.id, btn.dataset.status);
   }));
   document.querySelectorAll('[data-chat-room]').forEach(btn => btn.addEventListener('click', () => openChat(btn.dataset.chatRoom)));
+  document.querySelectorAll('[data-print-order]').forEach(btn => btn.addEventListener('click', () => printOrderById(btn.dataset.printOrder)));
 }
 function orderHtml(o) {
   const items = (o.items || []).map(i => `<li>${escapeHtml(i.name)} x ${i.qty} <strong>${thb(i.subtotal)}</strong></li>`).join('');
@@ -89,6 +94,7 @@ function orderHtml(o) {
     <div class="total" style="font-size:17px"><span>Total</span><span>${thb(o.total)}</span></div>
     <div class="order-actions">
       <button class="secondary" data-chat-room="${escapeHtml(o.room)}">แชท</button>
+      <button class="secondary print-order-btn" data-print-order="${escapeHtml(o.id)}">🖨️ พิมพ์</button>
       <button class="small-btn" title="ออเดอร์ใหม่" data-id="${o.id}" data-status="new">N</button>
       <button class="secondary" data-id="${o.id}" data-status="preparing">กำลังเตรียม</button>
       <button class="secondary" data-id="${o.id}" data-status="delivering">นำส่ง</button>
@@ -103,8 +109,10 @@ function checkNewOrderSound(orders) {
   if (!firstLoad) {
     const justArrived = newOrders.filter(o => !knownNewOrderIds.has(o.id));
     if (justArrived.length) {
-      const newestOrder = justArrived.sort((a,b) => new Date(b.createdAtText || 0) - new Date(a.createdAtText || 0))[0];
+      const sortedNew = justArrived.sort((a,b) => new Date(b.createdAtText || 0) - new Date(a.createdAtText || 0));
+      const newestOrder = sortedNew[0];
       triggerOrderAlert(newestOrder, justArrived.length);
+      if (autoPrintEnabled) setTimeout(() => printOrdersTicket(sortedNew, { auto:true }), 350);
     }
   }
   knownNewOrderIds = newIds;
@@ -434,6 +442,121 @@ async function closeActiveChatRoom() {
   $('chatMessages').innerHTML = '<div class="empty">ปิดแชทแล้ว ถ้าลูกค้าทักมาใหม่ ห้องนี้จะกลับมาในกล่องข้อความเข้า</div>';
   $('closeChatRoom').disabled = true;
   renderChatInbox();
+}
+
+
+function toggleAutoPrintOrders() {
+  autoPrintEnabled = !autoPrintEnabled;
+  localStorage.setItem('laya.rs.autoPrintOrders', autoPrintEnabled ? '1' : '0');
+  updateAutoPrintButton();
+  showSmallNotice(autoPrintEnabled
+    ? 'เปิด Auto Print แล้ว: เมื่อมีออเดอร์ใหม่ ระบบจะเรียกหน้าต่างพิมพ์อัตโนมัติ'
+    : 'ปิด Auto Print แล้ว: พนักงานยังสามารถกดปุ่มพิมพ์ในแต่ละออเดอร์ได้');
+}
+
+function updateAutoPrintButton() {
+  const btn = $('autoPrintOrders');
+  if (!btn) return;
+  btn.textContent = autoPrintEnabled ? '🖨️ Auto Print: เปิด' : '🖨️ Auto Print: ปิด';
+  btn.classList.toggle('auto-on', autoPrintEnabled);
+  btn.classList.toggle('auto-off', !autoPrintEnabled);
+}
+
+function printOrderById(orderId) {
+  const order = allOrders.find(o => String(o.id) === String(orderId));
+  if (!order) return alert('ไม่พบออเดอร์นี้');
+  printOrdersTicket([order]);
+}
+
+function printOrdersTicket(inputOrders, options = {}) {
+  const rows = Array.isArray(inputOrders) ? inputOrders : [inputOrders];
+  const orders = rows.filter(Boolean);
+  if (!orders.length) return alert('ไม่มีออเดอร์ให้พิมพ์');
+
+  const html = buildPrintHtml(orders, options);
+  const frame = document.createElement('iframe');
+  frame.className = 'print-frame';
+  frame.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(frame);
+  const doc = frame.contentWindow.document;
+  doc.open();
+  doc.write(html);
+  doc.close();
+  setTimeout(() => {
+    try {
+      frame.contentWindow.focus();
+      frame.contentWindow.print();
+    } catch (err) {
+      console.error('print failed', err);
+      alert('สั่งพิมพ์ไม่สำเร็จ กรุณาลองกดพิมพ์อีกครั้ง');
+    }
+    setTimeout(() => frame.remove(), 1200);
+  }, options.auto ? 650 : 300);
+}
+
+function buildPrintHtml(orders, options = {}) {
+  const printedAt = new Date().toLocaleString('th-TH', { dateStyle:'short', timeStyle:'short' });
+  const tickets = orders.map(o => printTicketHtml(o, printedAt)).join('<div class="page-break"></div>');
+  return `<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<title>Print Room Service Order</title>
+<style>
+  @page { size: 80mm auto; margin: 4mm; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:#fff; color:#111; font-family: Arial, Tahoma, sans-serif; font-size:12px; line-height:1.35; }
+  .ticket { width:72mm; max-width:72mm; margin:0 auto; padding:0; }
+  .center { text-align:center; }
+  h1 { margin:0; font-size:18px; letter-spacing:.5px; }
+  h2 { margin:4px 0 0; font-size:22px; }
+  .muted { color:#555; }
+  .line { border-top:1px dashed #333; margin:8px 0; }
+  .row { display:flex; justify-content:space-between; gap:8px; align-items:flex-start; }
+  .row strong { white-space:nowrap; }
+  table { width:100%; border-collapse:collapse; margin-top:4px; }
+  th { text-align:left; border-bottom:1px solid #111; padding:3px 0; font-size:11px; }
+  td { padding:4px 0; vertical-align:top; border-bottom:1px dotted #ddd; }
+  .qty { width:12mm; text-align:center; }
+  .amt { width:20mm; text-align:right; white-space:nowrap; }
+  .total { font-size:18px; font-weight:900; }
+  .note { border:1px solid #111; padding:6px; margin-top:6px; font-weight:700; white-space:pre-wrap; }
+  .footer { margin-top:8px; text-align:center; font-size:11px; color:#555; }
+  .page-break { break-after: page; page-break-after: always; }
+</style>
+</head><body>${tickets}</body></html>`;
+}
+
+function printTicketHtml(o, printedAt) {
+  const ref = String(o.id || '').slice(-6).toUpperCase();
+  const items = (o.items || []).map(i => `
+    <tr>
+      <td>${escapeHtml(i.name || i.nameTh || i.nameEn || 'Item')}<br><span class="muted">${thb(i.price || 0)} each</span></td>
+      <td class="qty">${Number(i.qty || 0)}</td>
+      <td class="amt">${thb(i.subtotal || (Number(i.qty || 0) * Number(i.price || 0)))}</td>
+    </tr>`).join('');
+  return `<section class="ticket">
+    <div class="center">
+      <h1>LAYA ROOM SERVICE</h1>
+      <div class="muted">Order Ticket / Kitchen Copy</div>
+      <h2>ROOM ${escapeHtml(o.room || '-')}</h2>
+    </div>
+    <div class="line"></div>
+    <div class="row"><span>Reference</span><strong>${escapeHtml(ref)}</strong></div>
+    <div class="row"><span>Order time</span><strong>${escapeHtml(fmtDate(o.createdAtText))}</strong></div>
+    <div class="row"><span>Print time</span><strong>${escapeHtml(printedAt)}</strong></div>
+    ${o.guestName ? `<div class="row"><span>Guest</span><strong>${escapeHtml(o.guestName)}</strong></div>` : ''}
+    <div class="row"><span>Status</span><strong>${escapeHtml(statusText(o.status || 'new'))}</strong></div>
+    <div class="line"></div>
+    <table>
+      <thead><tr><th>Item</th><th class="qty">Qty</th><th class="amt">Amount</th></tr></thead>
+      <tbody>${items}</tbody>
+    </table>
+    ${o.note ? `<div class="note">NOTE: ${escapeHtml(o.note)}</div>` : ''}
+    <div class="line"></div>
+    <div class="row total"><span>TOTAL</span><span>${thb(o.total || 0)}</span></div>
+    <div class="footer">Please verify room number before delivery.</div>
+  </section>`;
 }
 
 $('exportCsv').addEventListener('click', () => {

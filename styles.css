@@ -247,3 +247,11 @@ button:disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.2)}
     min-height:42px;
   }
 }
+
+
+/* v4.0 order printing controls */
+.print-toggle.auto-on{background:#e9fbf1;border-color:#9fd9b8;color:#177245}
+.print-toggle.auto-off{background:#fff7e8;border-color:#efd194;color:#8a5400}
+.print-order-btn{border-color:#b9d8d2;background:#f5fffc;color:var(--brand-dark)}
+.print-frame{position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0;pointer-events:none}
+@media print{.print-frame{display:none!important}}
