@@ -30,6 +30,13 @@
     <section class="hero">
       <h1>แก้ไขเมนูอาหารและราคา</h1>
       <p>รองรับชื่อเมนู/รายละเอียด 4 ภาษา: ไทย อังกฤษ จีน รัสเซีย ลูกค้าเปลี่ยนภาษาได้จากปุ่มมุมขวาบนของหน้า QR</p>
+      <div class="admin-tool-panel">
+        <div>
+          <strong>เครื่องมือจัดการรูปภาพ</strong>
+          <small>ใช้ปุ่มนี้เมื่อเคยบันทึกรูปแบบ Base64 ไว้ใน Firestore แล้วต้องการย้ายไป Firebase Storage เพื่อลดความหนักของฐานข้อมูล</small>
+        </div>
+        <button class="primary admin-tool-button" type="button" id="migrateImages">ย้ายรูป Base64 ไป Storage</button>
+      </div>
     </section>
 
     <section class="grid">
@@ -64,8 +71,8 @@
           <button id="saveBtn" class="primary" type="submit">บันทึกเมนูใหม่</button>
           <button class="secondary" type="button" id="resetForm">ล้างฟอร์ม / ยกเลิกแก้ไข</button>
           <button class="secondary" type="button" id="seedMenu">ใส่เมนูตัวอย่าง 4 ภาษา</button>
-          <button class="secondary" type="button" id="migrateImages">ย้ายรูป Base64 ไป Storage</button>
         </div>
+        <div class="notice warn" style="margin-top:12px">ปุ่ม <b>ย้ายรูป Base64 ไป Storage</b> ถูกย้ายไปไว้ด้านบนสุดของหน้า เพื่อให้หาเจอง่ายขึ้น</div>
       </form>
 
       <section class="card card-pad">

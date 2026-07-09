@@ -84,3 +84,16 @@ img{max-width:100%}
 .img-badge.good{background:#e7f8ed;color:#1b7f3e}
 .img-badge.warn{background:#fff6df;color:#a66300}
 .img-badge.bad{background:#ffeceb;color:#b42318}
+
+
+/* v2.5 temporary service lock + clearer admin storage migration */
+.service-btn.is-disabled{opacity:.38;filter:grayscale(1);cursor:not-allowed;pointer-events:none;position:relative}
+.service-btn.is-disabled .service-icon{background:#f1f1f1;color:#a7a7a7}
+.service-closed-badge{font-style:normal;font-size:11px;font-weight:900;color:#999;background:#f2f2f2;border-radius:999px;padding:3px 8px;margin-top:-2px;line-height:1}
+.disabled-feature{opacity:.42;filter:grayscale(1);cursor:not-allowed!important;pointer-events:none}
+.admin-tool-panel{margin-top:14px;display:flex;align-items:center;justify-content:space-between;gap:14px;background:#fff;border:1px solid #dbeee9;border-radius:18px;padding:14px;box-shadow:0 8px 20px rgba(63,143,129,.10)}
+.admin-tool-panel strong{display:block;color:var(--brand);font-size:16px;margin-bottom:3px}
+.admin-tool-panel small{display:block;color:var(--muted);line-height:1.45}
+.admin-tool-button{white-space:nowrap;min-width:230px}
+.notice.good{border-color:#bee1ce;background:#edfff5;color:var(--ok)}
+@media(max-width:720px){.admin-tool-panel{flex-direction:column;align-items:stretch}.admin-tool-button{width:100%;min-width:0}}

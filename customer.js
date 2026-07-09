@@ -19,42 +19,42 @@ const I18N = {
     navHome:'หน้าแรก', navChat:'แชท', navOrders:'คำสั่งของฉัน', chatTitle:'แชทกับพนักงาน', chatDesc:'สอบถามเมนู แจ้งแพ้อาหาร ขอแม่บ้าน หรือบริการอื่น ๆ ได้ที่นี่', chatPlaceholder:'พิมพ์ข้อความถึงพนักงาน...', send:'ส่ง', ordersTitle:'คำสั่งของฉัน', ordersDesc:'ติดตามสถานะออเดอร์ล่าสุดของห้องนี้',
     cart:'ตะกร้าอาหาร', items:'รายการ', openCart:'ดูตะกร้า', guestName:'ชื่อผู้สั่ง / Guest name', optional:'ไม่บังคับ', note:'หมายเหตุ', notePlaceholder:'เช่น ไม่เผ็ด / ขอช้อนเพิ่ม / แพ้อาหาร...', total:'รวมทั้งหมด', placeOrder:'ส่งออเดอร์',
     noMenu:'ยังไม่มีเมนูในระบบ พนักงานสามารถเพิ่มได้จากหน้า Admin', noItems:'ยังไม่มีเมนู', noCart:'ยังไม่มีรายการอาหาร', needRoomOrder:'กรุณาใส่เลขห้องก่อนส่งออเดอร์', needMenu:'กรุณาเลือกเมนูก่อนส่งออเดอร์', orderSuccess:'ส่งออเดอร์แล้ว เลขอ้างอิง', orderFail:'ส่งออเดอร์ไม่สำเร็จ กรุณาแจ้งพนักงาน', needRoomOrders:'กรุณาใส่เลขห้องก่อนดูคำสั่งซื้อ', noOrders:'ยังไม่มีคำสั่งซื้อของห้องนี้', ref:'Ref', you:'คุณ', staff:'พนักงาน', system:'ระบบ', needRoomChat:'กรุณาใส่เลขห้องก่อนใช้แชท', chatEmpty:'เริ่มแชทกับพนักงานได้เลย', prefillToast:'พิมพ์ข้อความไว้ให้แล้ว กดส่งเพื่อแจ้งพนักงาน', languageToast:'เปลี่ยนภาษาเป็นภาษาไทยแล้ว', recommended:'เมนูแนะนำ', extraCutlery:'ช้อนส้อมเพิ่ม', kidsMenu:'อาหารเด็ก',
-    serviceRoom:'บริการอาหารในห้อง', serviceMinibar:'มินิบาร์', serviceHousekeeping:'งานแม่บ้าน', serviceTransport:'การขนส่ง', serviceFront:'แผนกต้อนรับ', serviceMaintenance:'การซ่อมบำรุง', serviceReview:'ทบทวน', serviceInfo:'ข้อมูลโรงแรม', serviceVoucher:'Voucher'
+    serviceRoom:'บริการอาหารในห้อง', serviceMinibar:'มินิบาร์', serviceHousekeeping:'งานแม่บ้าน', serviceTransport:'การขนส่ง', serviceFront:'แผนกต้อนรับ', serviceMaintenance:'การซ่อมบำรุง', serviceReview:'ทบทวน', serviceInfo:'ข้อมูลโรงแรม', serviceVoucher:'Voucher', serviceClosed:'ยังไม่เปิด'
   },
   EN: {
     langBtn:'EN', cover:'Cover', environment:'Environment', roomMissing:'Room number was not found from the QR code. Please enter a room number for testing.', start:'Start', roomService:'LAYA Room Service', viewAll:'View all', all:'All', allMenu:'All menu', spaServices:'Spa & Services', spaPromo:'Relaxing Spa Package', transportPromo:'Airport Transfer / Shuttle',
     navHome:'Home', navChat:'Chat', navOrders:'My Orders', chatTitle:'Chat with Staff', chatDesc:'Ask about menus, allergies, housekeeping, or any hotel service here.', chatPlaceholder:'Type a message to staff...', send:'Send', ordersTitle:'My Orders', ordersDesc:'Track the latest order status for this room.',
     cart:'Food Cart', items:'items', openCart:'View cart', guestName:'Guest name', optional:'Optional', note:'Note', notePlaceholder:'e.g. not spicy / extra cutlery / food allergy...', total:'Total', placeOrder:'Place order',
     noMenu:'No menu items yet. Staff can add items from Admin.', noItems:'No menu items yet', noCart:'No food items in cart', needRoomOrder:'Please enter a room number before placing an order.', needMenu:'Please select menu items first.', orderSuccess:'Order sent. Reference', orderFail:'Order failed. Please contact staff.', needRoomOrders:'Please enter a room number before viewing orders.', noOrders:'No orders for this room yet.', ref:'Ref', you:'You', staff:'Staff', system:'System', needRoomChat:'Please enter a room number before using chat.', chatEmpty:'Start chatting with staff here.', prefillToast:'Message prepared. Tap Send to notify staff.', languageToast:'Language changed to English', recommended:'Recommended menu', extraCutlery:'Extra cutlery', kidsMenu:'Kids menu',
-    serviceRoom:'Room Service', serviceMinibar:'Minibar', serviceHousekeeping:'Housekeeping', serviceTransport:'Transportation', serviceFront:'Front Office', serviceMaintenance:'Maintenance', serviceReview:'Review', serviceInfo:'Hotel Info', serviceVoucher:'Voucher'
+    serviceRoom:'Room Service', serviceMinibar:'Minibar', serviceHousekeeping:'Housekeeping', serviceTransport:'Transportation', serviceFront:'Front Office', serviceMaintenance:'Maintenance', serviceReview:'Review', serviceInfo:'Hotel Info', serviceVoucher:'Voucher', serviceClosed:'Closed'
   },
   ZH: {
     langBtn:'中文', cover:'封面', environment:'环境', roomMissing:'未从二维码中找到房号。请输入房号进行测试。', start:'开始', roomService:'LAYA 客房送餐', viewAll:'查看全部', all:'全部', allMenu:'全部菜单', spaServices:'水疗与服务', spaPromo:'放松水疗套餐', transportPromo:'机场接送 / 班车',
     navHome:'首页', navChat:'聊天', navOrders:'我的订单', chatTitle:'与员工聊天', chatDesc:'可在这里咨询菜单、过敏、客房清洁或其他酒店服务。', chatPlaceholder:'输入给员工的消息...', send:'发送', ordersTitle:'我的订单', ordersDesc:'查看本房间最新订单状态。',
     cart:'餐品购物车', items:'项', openCart:'查看购物车', guestName:'客人姓名', optional:'选填', note:'备注', notePlaceholder:'例如：不要辣 / 加餐具 / 食物过敏...', total:'总计', placeOrder:'提交订单',
     noMenu:'系统中还没有菜单，员工可在 Admin 页面添加。', noItems:'暂无菜单', noCart:'购物车为空', needRoomOrder:'提交订单前请先输入房号。', needMenu:'请先选择菜单。', orderSuccess:'订单已发送，参考号', orderFail:'订单提交失败，请联系员工。', needRoomOrders:'查看订单前请先输入房号。', noOrders:'此房间暂无订单。', ref:'参考号', you:'您', staff:'员工', system:'系统', needRoomChat:'使用聊天前请先输入房号。', chatEmpty:'可在这里开始与员工聊天。', prefillToast:'消息已准备好，点击发送通知员工。', languageToast:'语言已切换为中文', recommended:'今日推荐', extraCutlery:'加餐具', kidsMenu:'儿童餐',
-    serviceRoom:'客房送餐', serviceMinibar:'迷你吧', serviceHousekeeping:'客房清洁', serviceTransport:'交通服务', serviceFront:'前台', serviceMaintenance:'维修服务', serviceReview:'评价', serviceInfo:'酒店信息', serviceVoucher:'优惠券'
+    serviceRoom:'客房送餐', serviceMinibar:'迷你吧', serviceHousekeeping:'客房清洁', serviceTransport:'交通服务', serviceFront:'前台', serviceMaintenance:'维修服务', serviceReview:'评价', serviceInfo:'酒店信息', serviceVoucher:'优惠券', serviceClosed:'暂未开放'
   },
   RU: {
     langBtn:'RU', cover:'Обложка', environment:'Окружение', roomMissing:'Номер комнаты не найден в QR-коде. Введите номер комнаты для теста.', start:'Начать', roomService:'LAYA Обслуживание в номере', viewAll:'Все', all:'Все', allMenu:'Все меню', spaServices:'Спа и услуги', spaPromo:'Расслабляющий спа-пакет', transportPromo:'Трансфер / шаттл',
     navHome:'Главная', navChat:'Чат', navOrders:'Мои заказы', chatTitle:'Чат с персоналом', chatDesc:'Здесь можно спросить о меню, аллергиях, уборке или других услугах отеля.', chatPlaceholder:'Напишите сообщение персоналу...', send:'Отправить', ordersTitle:'Мои заказы', ordersDesc:'Отслеживайте статус заказов для этой комнаты.',
     cart:'Корзина', items:'поз.', openCart:'Открыть корзину', guestName:'Имя гостя', optional:'Необязательно', note:'Примечание', notePlaceholder:'например: не остро / дополнительные приборы / аллергия...', total:'Итого', placeOrder:'Отправить заказ',
     noMenu:'Пока нет меню. Сотрудник может добавить позиции в Admin.', noItems:'Пока нет меню', noCart:'Корзина пуста', needRoomOrder:'Введите номер комнаты перед отправкой заказа.', needMenu:'Сначала выберите блюда.', orderSuccess:'Заказ отправлен. Номер', orderFail:'Не удалось отправить заказ. Обратитесь к персоналу.', needRoomOrders:'Введите номер комнаты перед просмотром заказов.', noOrders:'Для этой комнаты пока нет заказов.', ref:'№', you:'Вы', staff:'Персонал', system:'Система', needRoomChat:'Введите номер комнаты перед использованием чата.', chatEmpty:'Начните чат с персоналом здесь.', prefillToast:'Сообщение подготовлено. Нажмите Отправить.', languageToast:'Язык изменен на русский', recommended:'Рекомендации', extraCutlery:'Приборы', kidsMenu:'Детское меню',
-    serviceRoom:'Обслуживание в номере', serviceMinibar:'Мини-бар', serviceHousekeeping:'Уборка', serviceTransport:'Транспорт', serviceFront:'Ресепшен', serviceMaintenance:'Ремонт', serviceReview:'Отзывы', serviceInfo:'Информация отеля', serviceVoucher:'Ваучер'
+    serviceRoom:'Обслуживание в номере', serviceMinibar:'Мини-бар', serviceHousekeeping:'Уборка', serviceTransport:'Транспорт', serviceFront:'Ресепшен', serviceMaintenance:'Ремонт', serviceReview:'Отзывы', serviceInfo:'Информация отеля', serviceVoucher:'Ваучер', serviceClosed:'Закрыто'
   }
 };
 
 const fallbackImage = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=600&auto=format&fit=crop';
 const serviceBase = [
   { id:'room-service', icon:'🍽️', labelKey:'serviceRoom', hot:true, action:'menu' },
-  { id:'minibar', icon:'▰', labelKey:'serviceMinibar', message:{TH:'ขอเติม/สอบถามมินิบาร์ในห้องนี้',EN:'Please assist with minibar for this room.',ZH:'请协助处理本房间迷你吧。',RU:'Пожалуйста, помогите с мини-баром в этой комнате.'} },
-  { id:'housekeeping', icon:'🧹', labelKey:'serviceHousekeeping', message:{TH:'ขอใช้บริการแม่บ้านที่ห้องนี้',EN:'Please send housekeeping to this room.',ZH:'请安排客房清洁服务。',RU:'Пожалуйста, пришлите уборку в эту комнату.'} },
-  { id:'transport', icon:'🚐', labelKey:'serviceTransport', message:{TH:'ขอข้อมูลรถรับส่ง / Shuttle / Taxi',EN:'Please send shuttle / taxi information.',ZH:'请提供接送/出租车信息。',RU:'Пожалуйста, пришлите информацию о трансфере/такси.'} },
-  { id:'front', icon:'🛎️', labelKey:'serviceFront', message:{TH:'ขอติดต่อแผนกต้อนรับ',EN:'Please contact me from Front Office.',ZH:'请前台联系我。',RU:'Пожалуйста, свяжитесь со мной с ресепшена.'} },
-  { id:'maintenance', icon:'🛠️', labelKey:'serviceMaintenance', message:{TH:'ขอแจ้งซ่อมภายในห้องพักนี้',EN:'I would like to report a maintenance issue in this room.',ZH:'我想报告房间内的维修问题。',RU:'Я хочу сообщить о проблеме с ремонтом в комнате.'} },
-  { id:'review', icon:'💬', labelKey:'serviceReview', message:{TH:'ต้องการให้พนักงานติดต่อกลับเรื่องรีวิว/ข้อเสนอแนะ',EN:'Please contact me about feedback / review.',ZH:'请就评价/反馈联系我。',RU:'Пожалуйста, свяжитесь со мной по отзыву/предложению.'} },
-  { id:'info', icon:'☷', labelKey:'serviceInfo', message:{TH:'ขอข้อมูลโรงแรมและเวลาเปิด-ปิดบริการต่าง ๆ',EN:'Please send hotel information and service hours.',ZH:'请提供酒店信息和服务时间。',RU:'Пожалуйста, пришлите информацию об отеле и часах работы услуг.'} },
-  { id:'voucher', icon:'🎟️', labelKey:'serviceVoucher', message:{TH:'ขอสอบถาม Voucher / Promotion',EN:'Please send voucher / promotion information.',ZH:'请提供优惠券/促销信息。',RU:'Пожалуйста, пришлите информацию о ваучерах/акциях.'} }
+  { id:'minibar', icon:'▰', labelKey:'serviceMinibar', disabled:true, message:{TH:'ขอเติม/สอบถามมินิบาร์ในห้องนี้',EN:'Please assist with minibar for this room.',ZH:'请协助处理本房间迷你吧。',RU:'Пожалуйста, помогите с мини-баром в этой комнате.'} },
+  { id:'housekeeping', icon:'🧹', labelKey:'serviceHousekeeping', disabled:true, message:{TH:'ขอใช้บริการแม่บ้านที่ห้องนี้',EN:'Please send housekeeping to this room.',ZH:'请安排客房清洁服务。',RU:'Пожалуйста, пришлите уборку в эту комнату.'} },
+  { id:'transport', icon:'🚐', labelKey:'serviceTransport', disabled:true, message:{TH:'ขอข้อมูลรถรับส่ง / Shuttle / Taxi',EN:'Please send shuttle / taxi information.',ZH:'请提供接送/出租车信息。',RU:'Пожалуйста, пришлите информацию о трансфере/такси.'} },
+  { id:'front', icon:'🛎️', labelKey:'serviceFront', disabled:true, message:{TH:'ขอติดต่อแผนกต้อนรับ',EN:'Please contact me from Front Office.',ZH:'请前台联系我。',RU:'Пожалуйста, свяжитесь со мной с ресепшена.'} },
+  { id:'maintenance', icon:'🛠️', labelKey:'serviceMaintenance', disabled:true, message:{TH:'ขอแจ้งซ่อมภายในห้องพักนี้',EN:'I would like to report a maintenance issue in this room.',ZH:'我想报告房间内的维修问题。',RU:'Я хочу сообщить о проблеме с ремонтом в комнате.'} },
+  { id:'review', icon:'💬', labelKey:'serviceReview', disabled:true, message:{TH:'ต้องการให้พนักงานติดต่อกลับเรื่องรีวิว/ข้อเสนอแนะ',EN:'Please contact me about feedback / review.',ZH:'请就评价/反馈联系我。',RU:'Пожалуйста, свяжитесь со мной по отзыву/предложению.'} },
+  { id:'info', icon:'☷', labelKey:'serviceInfo', disabled:true, message:{TH:'ขอข้อมูลโรงแรมและเวลาเปิด-ปิดบริการต่าง ๆ',EN:'Please send hotel information and service hours.',ZH:'请提供酒店信息和服务时间。',RU:'Пожалуйста, пришлите информацию об отеле и часах работы услуг.'} },
+  { id:'voucher', icon:'🎟️', labelKey:'serviceVoucher', disabled:true, message:{TH:'ขอสอบถาม Voucher / Promotion',EN:'Please send voucher / promotion information.',ZH:'请提供优惠券/促销信息。',RU:'Пожалуйста, пришлите информацию о ваучерах/акциях.'} }
 ];
 
 $('hotelName').textContent = HOTEL_NAME;
@@ -152,12 +152,19 @@ renderCart();
 applyTranslations();
 
 function renderServiceGrid() {
-  $('serviceGrid').innerHTML = serviceBase.map(s => `
-    <button class="service-btn ${s.hot ? 'hot' : ''}" data-service-id="${escapeAttr(s.id)}" ${s.message ? `data-service-prefill="${escapeAttr(messageFor(s.message))}"` : ''}>
-      <span class="service-icon" aria-hidden="true">${s.icon}</span>
-      <small>${escapeHtml(t(s.labelKey))}</small>
-    </button>
-  `).join('');
+  $('serviceGrid').innerHTML = serviceBase.map(s => {
+    const disabled = Boolean(s.disabled);
+    const attrs = disabled
+      ? 'disabled aria-disabled="true" title="Service temporarily closed"'
+      : `data-service-id="${escapeAttr(s.id)}" ${s.message ? `data-service-prefill="${escapeAttr(messageFor(s.message))}"` : ''}`;
+    return `
+      <button class="service-btn ${s.hot ? 'hot' : ''} ${disabled ? 'is-disabled' : ''}" ${attrs}>
+        <span class="service-icon" aria-hidden="true">${s.icon}</span>
+        <small>${escapeHtml(t(s.labelKey))}</small>
+        ${disabled ? `<em class="service-closed-badge">${escapeHtml(t('serviceClosed'))}</em>` : ''}
+      </button>
+    `;
+  }).join('');
 }
 
 function renderQuickChat() {
