@@ -7,16 +7,20 @@
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
-  <div id="pinGate" class="pin-gate hidden">
-    <!-- v4.2: ปิด PIN แล้ว เปิด Staff Board อัตโนมัติสำหรับเครื่อง SUNMI -->
-    <div class="pin-card">
-      <h2>กำลังเปิด Staff Board...</h2>
-      <p style="color:var(--muted)">ไม่ต้องใส่ PIN</p>
+  <noscript>
+    <div style="padding:16px;background:#fff3cd;color:#664d03;font-family:sans-serif">
+      เครื่องนี้ปิด JavaScript อยู่ กรุณาเปิด JavaScript ก่อนใช้งาน Staff Board
     </div>
-  </div>
+  </noscript>
 
   <header class="header">
-    <div class="brand"><div class="logo">L</div><div><div id="hotelName">LAYA Resort</div><small style="color:var(--muted)">Room Service Staff Board</small></div></div>
+    <div class="brand">
+      <div class="logo">L</div>
+      <div>
+        <div id="hotelName">LAYA Resort</div>
+        <small style="color:var(--muted)">Room Service Staff Board</small>
+      </div>
+    </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
       <button id="enableAlerts" class="secondary alert-toggle" type="button">🔊 เปิดเสียงแจ้งเตือน</button>
       <a class="secondary" href="./admin.html">Admin Menu</a>
@@ -24,7 +28,6 @@
       <span id="modePill" class="mode-pill hidden">Demo</span>
     </div>
   </header>
-
 
   <div id="staffAlert" class="staff-alert hidden" role="alert" aria-live="assertive">
     <div class="staff-alert-icon">🔔</div>
@@ -41,6 +44,7 @@
     <section class="hero">
       <h1>Realtime Order Board</h1>
       <p>ออเดอร์จากห้องพักจะแสดงที่นี่แบบ Realtime พร้อมเปลี่ยนสถานะและแชทกับลูกค้า</p>
+      <div id="legacyNotice" class="notice" style="margin-top:12px">โหมด SUNMI Legacy: กำลังเชื่อมต่อ Firebase...</div>
     </section>
 
     <div class="staff-layout">
@@ -56,7 +60,7 @@
             <option value="cancelled">ยกเลิก</option>
           </select>
           <input id="roomSearch" placeholder="ค้นหาเลขห้อง เช่น A101" />
-          <button id="exportCsv" class="secondary">Export CSV</button>
+          <button id="exportCsv" class="secondary" type="button">Export CSV</button>
           <button id="autoPrintOrders" class="secondary print-toggle" type="button">🖨️ Auto Print: ปิด</button>
           <button id="printVisibleOrders" class="secondary" type="button">พิมพ์รายการที่แสดง</button>
         </div>
@@ -77,7 +81,7 @@
         </div>
         <div id="chatInbox" class="chat-inbox"><div class="empty">ยังไม่มีแชทจากลูกค้า</div></div>
         <div class="field"><label>เลือก/ใส่เลขห้อง</label><input id="chatRoom" placeholder="เช่น A101" /></div>
-        <button id="openChat" class="secondary" style="width:100%;margin-bottom:10px">เปิดแชทห้องนี้</button>
+        <button id="openChat" class="secondary" style="width:100%;margin-bottom:10px" type="button">เปิดแชทห้องนี้</button>
         <div class="chat-title-row">
           <div id="chatTitle" class="notice">ยังไม่ได้เลือกห้อง</div>
           <button id="closeChatRoom" class="danger" type="button" disabled>ปิดแชทนี้</button>
@@ -87,14 +91,18 @@
           <div id="chatMessages" class="chat-messages"><div class="empty">เลือกห้องเพื่อดูแชท</div></div>
           <div class="chat-send">
             <input id="chatInput" placeholder="ตอบลูกค้า..." />
-            <button class="primary" id="sendChat">ส่ง</button>
+            <button class="primary" id="sendChat" type="button">ส่ง</button>
           </div>
         </div>
-        <p class="footer-note">หมายเหตุ: PIN แบบนี้เหมาะสำหรับต้นแบบเท่านั้น งานจริงควรใช้ Firebase Authentication หรือระบบ Login พนักงาน</p>
+        <p class="footer-note">หน้านี้ใช้โหมด Legacy สำหรับเครื่อง SUNMI/Android Browser รุ่นเก่า</p>
       </aside>
     </div>
   </main>
 
-  <script type="module" src="./staff.js"></script>
+  <!-- Legacy Firebase SDK for SUNMI / older Android browsers. Do not change to type=module here. -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="./firebase-config-legacy.js"></script>
+  <script src="./staff-legacy.js?v=43"></script>
 </body>
 </html>

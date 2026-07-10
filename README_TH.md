@@ -1,16 +1,32 @@
-# LAYA Room Service QR v4.2 — No Staff PIN
+# LAYA Room Service QR v4.3 - SUNMI Legacy Staff Fix
 
-เวอร์ชันนี้ปิดหน้า Staff Login แล้ว เพื่อให้เครื่อง SUNMI เปิด Staff Board ได้ทันทีโดยไม่ต้องใส่รหัส PIN
+เวอร์ชันนี้แก้ปัญหาเครื่อง SUNMI / Android Browser รุ่นเก่าเปิด Staff Board แล้วค้างที่ `กำลังโหลดออเดอร์...`
 
-## สิ่งที่แก้
-- ปิด PIN Gate ใน `staff.html`
-- `staff.js` เรียกเปิด Staff Board อัตโนมัติ
-- เหมาะสำหรับเครื่อง SUNMI ที่กดปุ่ม Login แล้วไม่ทำงาน
+## สาเหตุ
+เครื่อง SUNMI บางรุ่นใช้ Chrome/WebView เก่า ทำให้ไม่รองรับ `type="module"` และ Firebase SDK รุ่นใหม่แบบ ES Module เต็มรูปแบบ หน้าเว็บจึงแสดงผลได้ แต่ JavaScript สำหรับโหลดออเดอร์ไม่ทำงาน
 
-## ไฟล์ที่ต้องอัปโหลดทับ
+## สิ่งที่แก้ใน v4.3
+- เปลี่ยนหน้า `staff.html` เป็นโหมด Legacy สำหรับ SUNMI
+- ใช้ Firebase SDK v8 แบบ script ธรรมดา ไม่ใช้ `type="module"`
+- เพิ่มไฟล์ `firebase-config-legacy.js`
+- เพิ่มไฟล์ `staff-legacy.js`
+- ไม่มี PIN Staff Login
+- ถ้า Firestore อ่านไม่ได้ จะแสดง error บนหน้า ไม่ค้างเงียบ
+- ยังรองรับออเดอร์, เปลี่ยนสถานะ, แชท, ปิดแชท, เสียงแจ้งเตือน, Auto Print และพิมพ์ Order Ticket
+
+## ไฟล์ที่ต้องอัปโหลดทับ GitHub
+อย่างน้อยอัปโหลด 3 ไฟล์นี้:
+
 - `staff.html`
-- `staff.js`
+- `staff-legacy.js`
+- `firebase-config-legacy.js`
 
-หลังอัปโหลดขึ้น GitHub แล้ว ให้เปิด `staff.html` บนเครื่อง SUNMI แล้วกด Refresh หรือปิด/เปิด Browser ใหม่
+ถ้ามีไฟล์เสียงแจ้งเตือนอยู่แล้ว ไม่ต้องอัปโหลดใหม่ แต่ถ้ายังไม่มีให้อัปโหลด `alert-sound.mp3` ด้วย
 
-หมายเหตุ: การเอารหัสออกเหมาะกับการใช้งานภายในเท่านั้น ถ้าจะใช้งานจริงระยะยาว ควรทำ Login ที่เสถียรกว่าแบบ PIN เช่น Firebase Authentication หรือจำกัดสิทธิ์ตามเครื่อง/บัญชีพนักงาน
+## หลังอัปโหลด
+1. รอ GitHub Pages deploy
+2. เปิดบนเครื่อง SUNMI:
+   `https://laya-resort-hotel.github.io/Room-Service/staff.html`
+3. ปิด/เปิด Browser ใหม่ หรือกด Reload
+4. ถ้ายังขึ้น error ให้ดูข้อความในกล่องด้านบน จะบอกว่าเป็นปัญหา Firebase Rules หรืออินเทอร์เน็ต
+
