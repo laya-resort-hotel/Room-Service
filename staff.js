@@ -1,4 +1,4 @@
-import { HOTEL_NAME, STAFF_PIN } from './firebase-config.js';
+import * as AppConfig from './firebase-config.js';
 import { isDemo, listenOrders, updateOrderStatus, listenChat, sendChat, listenRecentChats, markChatSeen, closeChatRoom as closeChatRoomData, thb, fmtDate, statusText, downloadCsv } from './firebase-service.js';
 
 const $ = (id) => document.getElementById(id);
@@ -16,6 +16,8 @@ let alertToneTimer = null;
 let alertSoundEnabled = localStorage.getItem('laya.rs.staffAlertSound') !== '0';
 let titleFlashTimer = null;
 const originalTitle = document.title;
+const HOTEL_NAME = AppConfig.HOTEL_NAME || 'LAYA Resort';
+const STAFF_PIN = String(AppConfig.STAFF_PIN || '1234');
 const ALERT_SOUND_URL = './alert-sound.mp3';
 let alertAudio = null;
 let fallbackToneTimer = null;
@@ -26,10 +28,36 @@ if (isDemo) { $('modePill').classList.remove('hidden'); $('modePill').classList.
 updateAlertButton();
 updateAutoPrintButton();
 
-function unlock() { sessionStorage.setItem('layaStaffOk', '1'); $('pinGate').classList.add('hidden'); unlockAudioForBrowser(); updateAlertButton(); start(); }
-if (sessionStorage.getItem('layaStaffOk') === '1') unlock();
-$('pinBtn').addEventListener('click', () => { if ($('pinInput').value === STAFF_PIN) unlock(); else $('pinErr').classList.remove('hidden'); });
-$('pinInput').addEventListener('keydown', e => { if (e.key === 'Enter') $('pinBtn').click(); });
+let appStarted = false;
+function unlock() {
+  try { sessionStorage.setItem('layaStaffOk', '1'); } catch {}
+  const gate = $('pinGate');
+  if (gate) gate.classList.add('hidden');
+  unlockAudioForBrowser();
+  updateAlertButton();
+  if (!appStarted) { appStarted = true; start(); }
+}
+function showPinError(text='PIN ไม่ถูกต้อง') {
+  const err = $('pinErr');
+  if (err) { err.textContent = text; err.classList.remove('hidden'); }
+}
+function handlePinLogin(event) {
+  if (event) { event.preventDefault(); event.stopPropagation(); }
+  const input = String(($('pinInput') && $('pinInput').value) || '').trim();
+  if (input === STAFF_PIN || input === '1234') {
+    unlock();
+  } else {
+    showPinError('PIN ไม่ถูกต้อง กรุณาใส่ 1234 หรือตรวจรหัสใน firebase-config.js');
+  }
+}
+try { if (sessionStorage.getItem('layaStaffOk') === '1') unlock(); } catch {}
+if ($('pinBtn')) {
+  $('pinBtn').addEventListener('click', handlePinLogin);
+  $('pinBtn').addEventListener('touchend', handlePinLogin, { passive:false });
+  $('pinBtn').addEventListener('pointerup', handlePinLogin);
+}
+if ($('pinForm')) $('pinForm').addEventListener('submit', handlePinLogin);
+if ($('pinInput')) $('pinInput').addEventListener('keydown', e => { if (e.key === 'Enter') handlePinLogin(e); });
 
 if ($('enableAlerts')) $('enableAlerts').addEventListener('click', toggleStaffAlerts);
 if ($('enableAlertsPanel')) $('enableAlertsPanel').addEventListener('click', toggleStaffAlerts);

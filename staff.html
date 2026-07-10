@@ -8,13 +8,14 @@
 </head>
 <body>
   <div id="pinGate" class="pin-gate">
-    <div class="pin-card">
+    <form id="pinForm" class="pin-card" autocomplete="off">
       <h2>Staff Login</h2>
       <p style="color:var(--muted)">ใส่ PIN พนักงานเพื่อเข้า Order Board</p>
-      <div class="field"><label>PIN</label><input id="pinInput" type="password" inputmode="numeric" placeholder="1234" /></div>
-      <button id="pinBtn" class="primary" style="width:100%">เข้าใช้งาน</button>
+      <div class="field"><label>PIN</label><input id="pinInput" type="password" inputmode="numeric" pattern="[0-9]*" placeholder="1234" autocomplete="one-time-code" /></div>
+      <button id="pinBtn" class="primary" type="submit" style="width:100%;min-height:54px;font-size:18px">เข้าใช้งาน</button>
       <div id="pinErr" class="notice bad hidden" style="margin-top:10px">PIN ไม่ถูกต้อง</div>
-    </div>
+      <p class="footer-note" style="margin-top:10px">ถ้ากดบนเครื่อง SUNMI แล้วไม่ไป ให้กด Enter/Done บนคีย์บอร์ด หรือรีเฟรชหน้า 1 ครั้ง</p>
+    </form>
   </div>
 
   <header class="header">
