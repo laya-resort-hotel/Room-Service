@@ -17,7 +17,7 @@ let alertSoundEnabled = localStorage.getItem('laya.rs.staffAlertSound') !== '0';
 let titleFlashTimer = null;
 const originalTitle = document.title;
 const HOTEL_NAME = AppConfig.HOTEL_NAME || 'LAYA Resort';
-const STAFF_PIN = String(AppConfig.STAFF_PIN || '1234');
+const STAFF_PIN = String(AppConfig.STAFF_PIN || '1234'); // เหลือไว้เพื่อ compatibility แต่ v4.2 เปิดบอร์ดอัตโนมัติ
 const ALERT_SOUND_URL = './alert-sound.mp3';
 let alertAudio = null;
 let fallbackToneTimer = null;
@@ -51,6 +51,8 @@ function handlePinLogin(event) {
   }
 }
 try { if (sessionStorage.getItem('layaStaffOk') === '1') unlock(); } catch {}
+// v4.2: ปิดระบบ PIN สำหรับ Staff Board เพื่อให้เครื่อง SUNMI เปิดใช้งานได้ทันที
+setTimeout(() => unlock(), 0);
 if ($('pinBtn')) {
   $('pinBtn').addEventListener('click', handlePinLogin);
   $('pinBtn').addEventListener('touchend', handlePinLogin, { passive:false });
